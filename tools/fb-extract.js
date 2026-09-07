@@ -6,6 +6,8 @@
 // 不會送出任何請求、不碰你的帳號，等同於你自己捲頁面把看到的文字抄下來。
 (async () => {
   const MIN_POSTS = window.__fbMinPosts || 20;   // 至少抓到這麼多篇才停
+  // 已抓過的 id（'fb:' 可省略）：在「新貼文優先」的頁面上，連續碰到舊貼文就提早停，不用整頁捲完
+  const KNOWN = new Set([...(window.__fbKnown || [])].map((x) => String(x).replace(/^fb:/, '')));
   const MAX_SCROLLS = 60;                         // 保險上限（約 90 秒）
   const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
   const gid = (location.pathname.match(/\/groups\/(\d+)/) || [])[1];
@@ -25,8 +27,21 @@
     if (sw && sw.getAttribute('aria-checked') !== 'true' && !sw.checked) { sw.click(); await sleep(2500); }
   }
   // 自動捲到夠為止：連續 8 次沒長出新貼文就當作到底了
+  const hash = (t) => { let h = 0; for (const c of t) h = (h * 31 + c.charCodeAt(0)) >>> 0; return h.toString(36); };
+  const idOfBox = (b) => {
+    if (!isSearch) { const a = b.querySelector(sel); const m = a && a.href.match(/\/(?:posts|permalink)\/(\d+)/); return m ? m[1] : null; }
+    const t = clean([...new Set([...b.querySelectorAll('div[dir="auto"]')].map((x) => clean(x.innerText)).filter((x) => x.length > 1))].join('\n').split(/\n?顯示較少/)[0]);
+    return t.length >= 40 ? 'q' + hash(t) : null;
+  };
+  const newCount = () => { if (!KNOWN.size) return countNow();
+    const boxes = [...(document.querySelector('[role="feed"]')?.children || [])];
+    return boxes.map(idOfBox).filter((id) => id && !KNOWN.has(id)).length; };
+  const tailAllKnown = () => { if (!KNOWN.size) return false;
+    const ids = [...(document.querySelector('[role="feed"]')?.children || [])].map(idOfBox).filter(Boolean).slice(-8);
+    return ids.length >= 8 && ids.every((id) => KNOWN.has(id)); };
   let stale = 0, last = countNow();
-  for (let i = 0; i < MAX_SCROLLS && countNow() < MIN_POSTS; i++) {
+  for (let i = 0; i < MAX_SCROLLS && newCount() < MIN_POSTS; i++) {
+    if (tailAllKnown()) { console.log('最後 8 篇都抓過了，提早停'); break; }
     window.scrollBy(0, 1800); await sleep(1400);
     [...(document.querySelector('[role="feed"]') || document).querySelectorAll('div[role="button"]')]
       .filter((b) => /^(?:顯示更多|查看更多|See more)$/.test(b.innerText.trim())).forEach((b) => b.click());
@@ -41,7 +56,6 @@
   const posts = new Map();
   // 社團「關鍵字搜尋」結果頁（/groups/<id>/search/?q=…）：貼文全文與圖片都在，但沒有永久連結、沒有日期，
   // 用本文雜湊當 id，連結先指回搜尋頁。好處是可以先用「最新」與「發佈日期」篩選，比動態牆有效率。
-  const hash = (t) => { let h = 0; for (const c of t) h = (h * 31 + c.charCodeAt(0)) >>> 0; return h.toString(36); };
   if (isSearch) {
     const feed = document.querySelector('[role="feed"]');
     for (const box of feed ? [...feed.children] : []) {
