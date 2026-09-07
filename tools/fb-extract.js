@@ -5,7 +5,7 @@
   const SCROLLS = 12;                       // 捲幾次（每次約 1.5 秒），社團動態很慢
   const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
   const gid = (location.pathname.match(/\/groups\/(\d+)/) || [])[1];
-  if (!gid) return alert('請在 facebook.com/groups/<數字> 的社團頁執行');
+  if (!gid) return alert('請在 facebook.com/groups/<數字> 的社團頁（或其搜尋結果頁）執行');
   const groupName = (document.title.replace(/^\(\d+\)\s*/, '').split('|')[0] || '').trim();
 
   for (let i = 0; i < SCROLLS; i++) {
@@ -21,7 +21,22 @@
   const uniq = (el) => new Set([...el.querySelectorAll(sel)].map((a) => norm(a.href))).size;
 
   const posts = new Map();
-  for (const a of document.querySelectorAll(sel)) {
+  // 社團「關鍵字搜尋」結果頁（/groups/<id>/search/?q=…）：貼文全文與圖片都在，但沒有永久連結、沒有日期，
+  // 用本文雜湊當 id，連結先指回搜尋頁。好處是可以先用「最新」與「發佈日期」篩選，比動態牆有效率。
+  const hash = (t) => { let h = 0; for (const c of t) h = (h * 31 + c.charCodeAt(0)) >>> 0; return h.toString(36); };
+  const isSearch = /\/search\//.test(location.pathname);
+  if (isSearch) {
+    const feed = document.querySelector('[role="feed"]');
+    for (const box of feed ? [...feed.children] : []) {
+      const paras = [...box.querySelectorAll('div[dir="auto"]')].map((x) => clean(x.innerText)).filter((t) => t.length > 1);
+      const text = [...new Set(paras)].join('\n').split(/\n?顯示較少/)[0].trim();
+      if (text.length < 40) continue;
+      const images = [...box.querySelectorAll('img[src*="scontent"]')].filter((i) => (i.naturalWidth || i.width) > 150).map((i) => i.src);
+      const id = 'q' + hash(text);
+      posts.set(id, { id, link: location.href.replace(/[#].*$/, ''), text, postedText: '', images: [...new Set(images)].slice(0, 8), fromSearch: true });
+    }
+  }
+  for (const a of isSearch ? [] : document.querySelectorAll(sel)) {
     const link = norm(a.href); if (posts.has(link)) continue;
     // 從永久連結往上爬，爬到「再上去就會包到別篇貼文」為止，那層就是這篇的容器
     let el = a, box = null;
