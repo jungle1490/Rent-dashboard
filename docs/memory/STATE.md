@@ -21,11 +21,13 @@ _Last rewritten: 2026-09-08 by Claude Fable 5.1（session-end）._
 - launchd `com.rent-dashboard.daily` 已安裝（每天 08:00 跑 `tools/run-local.sh`）。首次完整本機執行 VERIFIED：3,911 筆 → data 分支 → `publish.sh` 以 `gh workflow run` 觸發發布 → 線上更新（推孤兒分支本身不會觸發 workflow）。
 - 看板有「↻ 更新資料」鈕：重新讀已發布的 data.json／fb.json，有變才重畫；切回分頁超過 5 分鐘自動檢查。它**不能**直接抓 591（VERIFIED 591 無 CORS header）。
 - 房源卡片／面板／滑卡顯示時間：591 用 `refreshTime`（X 小時內更新）＋首次出現；FB 用 `postedAt`（永久連結 aria-label 的完整日期，VERIFIED）＋首次出現。FB 匯入只留最近 30 天（`core/fb-listing.mjs` KEEP_DAYS）。
+- **遠端叫 Mac 抓**（T-011，VERIFIED）：看板「⚡ 請 Mac 抓新資料」→ GitHub Run workflow `refresh.yml` → refresh 分支時間戳 → Mac launchd `com.rent-dashboard.poll` 每 5 分鐘 `poll-refresh.sh` → run-local.sh。任何能按 workflow 的東西（手機 GitHub App、gh、cloud routine）都能觸發。
+- `fb-extract.js` 支援社團搜尋結果頁（全文＋圖較齊、可先篩「最新／發佈日期」，但無永久連結與日期）。
 - T-010（FB 每日自動抽取）未開始。
 
 ## Next (ordered)
 
-1. 使用者決定「按鈕遠端叫醒 Mac 抓取」要不要做、用哪種觸發（GitHub UI 點一下＋Mac 輪詢／瀏覽器存 PAT／Tailscale Funnel）→ T-011。
+1. T-010 FB 每日自動（AppleScript 驅動 Chrome 跑 fb-extract）；T-012 改用 591 BFF API。
 2. 使用者在登入 Chrome 對兩個社團跑 `tools/fb-extract.js`（459966811445588、305665579858865），貼進看板或交 agent 匯入。
 3. T-008 抽取補強：地標→行政區（天母→士林區）、插字步行距離、多房價取區間。
 4. T-004 抽出 `scrape.mjs` 的 core 純函式到 `core/` 並補測試（text-extract／fb-listing 已在 core/）。

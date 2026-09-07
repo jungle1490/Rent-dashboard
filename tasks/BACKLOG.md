@@ -25,7 +25,7 @@ Tier legend: **low** = any model · **mid** = capable coding model · **TOP** = 
 - [x] **T-009** 抓取改到 Mac 排程 + 孤兒分支 data 發布（591 擋 Actions IP，ADR-0003）— mid（2026-09-08 完成：data 分支、發布 workflow 成功、launchd 每天 08:00）
 - [ ] **T-010** FB 每日自動抽取：AppleScript 驅動已登入的 Chrome 執行 fb-extract.js → fb-import → 併入 run-local.sh — mid
 
-- [ ] **T-011** 看板按鈕遠端叫醒 Mac 抓取：Mac 每 5 分鐘輪詢觸發訊號（GitHub UI 手動觸發／PAT／Tailscale Funnel 三選一）→ run-local.sh；頁面自動偵測到新資料 — mid（待使用者選觸發方式）
+- [x] **T-011** 遠端叫 Mac 抓新資料：`refresh.yml`（workflow_dispatch → refresh 分支時間戳）+ Mac 每 5 分鐘 `poll-refresh.sh` — mid（2026-09-08 完成，端到端實測觸發成功）
 
 - [ ] **T-012** scrape.mjs 改打 591 BFF API（`bff-house.591.com.tw/v3/web/rent/list`）— mid
       VERIFIED 不用登入／deviceid；欄位與 __NUXT__ 相同（56 欄）；分頁不是 `page=`（page=2 回同一頁），回應有 `firstRow`，應改 `firstRow=30,60…` 實測。
