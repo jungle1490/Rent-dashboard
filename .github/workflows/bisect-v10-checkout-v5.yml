@@ -1,14 +1,14 @@
-name: bisect-v8-checkout-plain
+name: bisect-v10-checkout-v5
 on:
   push:
     branches:
       - main
 permissions:
   contents: read
+  pages: write
+  id-token: write
 jobs:
-  deploy:
+  t:
     runs-on: ubuntu-latest
-
     steps:
-      - uses: actions/checkout@v4
-      - run: echo hi
+      - uses: actions/checkout@v5

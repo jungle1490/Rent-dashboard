@@ -1,14 +1,14 @@
-name: bisect-v6-timeout
+name: bisect-v12-configure-pages
 on:
   push:
     branches:
       - main
 permissions:
   contents: read
+  pages: write
+  id-token: write
 jobs:
-  deploy:
+  t:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
     steps:
-
-      - run: echo hi
+      - uses: actions/configure-pages@v5

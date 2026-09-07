@@ -1,15 +1,14 @@
-name: bisect-v9-env
+name: bisect-v14-checkout-v4-2-2
 on:
   push:
     branches:
       - main
 permissions:
   contents: read
+  pages: write
+  id-token: write
 jobs:
-  deploy:
+  t:
     runs-on: ubuntu-latest
-    environment:
-      name: github-pages
     steps:
-
-      - run: echo hi
+      - uses: actions/checkout@v4.2.2
