@@ -11,3 +11,6 @@ site/data.json
 # 由 core/ 複製給網頁用，部署時 workflow 會複製
 site/text-extract.mjs
 site/fb-listing.mjs
+
+# 本機排程日誌
+logs/

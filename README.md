@@ -20,29 +20,32 @@
 ## 架構
 
 ```
-GitHub Actions（每 30 分鐘，雲端跑，電腦關機也不影響）
-   └─ scrape.mjs 抓 591 → 產生 site/data.json
-              ↓
-GitHub Pages ← 直接發布 site/（不 commit 資料，repo 不會被歷史撐大）
+你的 Mac（launchd 每天 08:00；睡眠錯過會在喚醒後補跑）
+   └─ tools/run-local.sh：node scrape.mjs 抓 591 → tools/publish.sh
+                                                     ↓ force push 孤兒分支 data（歷史不成長）
+GitHub Actions（push 到 main／data 就跑）
+   └─ 把 data 分支的 data.json／fb.json 疊到 site/ → 發布 GitHub Pages
 
-keepalive.yml（每週一次）
-   └─ 推一個時間戳 commit，避免排程被 GitHub 判定閒置而停用
+任何裝置 → https://<帳號>.github.io/<repo>/
 ```
 
-上一輪的結果透過 Actions cache 帶到下一輪，用來判斷新上架和降價。
+為什麼不在 GitHub 上抓：591 對 GitHub Actions 的機房 IP 回 403（CloudFront 封鎖），只有台灣的 IP 打得到。
+所以資料的新鮮度＝你的 Mac 最後一次執行；網址本身隨時都開得到。
+
+FB 社團房源：在你登入的瀏覽器裡跑 `tools/fb-extract.js`，貼進看板「匯入」或 `node tools/fb-import.mjs`（見 docs/adr/ADR-0002）。
 
 ## 安裝
 
 1. 建一個**公開** repo，把這些檔案推上去。
-   （Pages 免費版只能配公開 repo；資料本身是 591 上的公開物件。）
+2. Repo → **Settings → Pages → Source** 選 **GitHub Actions**（必要，不是預設）。
+3. 在 Mac 上：`brew install gh && gh auth login`，然後
 
-2. Repo → **Settings → Pages → Source** 選 **GitHub Actions**。
-   這步是必要的，不是預設值。
+```bash
+bash tools/install-launchd.sh 8      # 每天 08:00；改數字換時間
+bash tools/run-local.sh              # 現在先跑一次（約 5 分鐘）
+```
 
-3. Repo → **Actions** 分頁 → 選「抓取 591 租屋資料」→ **Run workflow** 手動跑第一次。
-   第一次約 3～5 分鐘。跑完網址會是 `https://<你的帳號>.github.io/<repo 名>/`。
-
-之後每 30 分鐘自動更新，不用管它。
+跑完約一分鐘後網址就有資料。之後每天自動。
 
 ## 調整抓取範圍
 
@@ -65,17 +68,15 @@ keepalive.yml（每週一次）
 ## 本機測試
 
 ```bash
-node scrape.mjs && python3 -m http.server 8899 --directory site
+cp core/*.mjs site/ && node scrape.mjs && python3 -m http.server 8899 --directory site
 ```
 
 ## 注意事項
 
-- **抓取頻率**：預設每 30 分鐘、每頁間隔 0.7 秒，對 591 是很輕的負擔。不建議再調高。
+- **抓取頻率**：預設每天一次、每頁間隔 0.7 秒，對 591 是很輕的負擔。
 - **591 改版**：`scrape.mjs` 依賴 591 頁面內嵌的 `window.__NUXT__` 資料。如果 591 改版，
   抓取會直接報錯中止（不會用空資料覆蓋掉舊的），Actions 會寄失敗通知給你。
-- **排程休眠**：GitHub 會自動停用「60 天內沒有 repo 活動」的排程。因為這個 repo 刻意
-  不把資料 commit 進版控，正常情況下不會有新 commit，所以另外放了 `keepalive.yml`，
-  每週推一個時間戳 commit 當活動證明。真的還是被停用了，去 Actions 頁面手動觸發一次就會恢復。
+- **Mac 沒開就不更新**：資料停在最後一次；看板頂部「資料更新於」看得出來。手動補跑：`bash tools/run-local.sh`。
 - **收藏／排除存在瀏覽器本機**，換裝置或清快取不會同步。要跨裝置同步得另外接儲存。
 
 `legacy/` 是先前 Telegram 推播版本的檔案，沒有在用，留著參考。

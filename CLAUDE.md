@@ -30,7 +30,8 @@ scrape.mjs
   ├─ core（純函式，無 I/O）  normalize / resolveStation / parseContains / mrt-lines.json
   │                           輸入 591 原始物件 → 輸出 UI 用的正規化物件。
   └─ adapters（I/O）          fetchPage（591 HTTP + vm 沙箱求值）/ 讀寫 data.json / config.json
-.github/workflows/         scrape.yml 每 30 分鐘抓取＋部署 Pages；keepalive.yml 每週 commit 防排程停用
+.github/workflows/         scrape.yml：push 到 main／data 就把 data 分支的檔案疊上 site/ 部署 Pages（不抓取）
+tools/run-local.sh         Mac launchd 每日：node scrape.mjs → tools/publish.sh（孤兒分支 data force push）
 
 import 規則：core 不 import 任何東西（連 node: 內建都不行）；adapters 才碰 fetch/fs/vm。
 ```
@@ -52,7 +53,8 @@ Source of truth: `docs/CONVENTIONS.md`. The most-violated ones:
 | 4 | **「新上架」= 跨輪 `firstSeen` 比對，不是 591 的 tag** | 591 的 tag 不可靠；首輪 >60% 為新時 UI 會自動關掉標記 |
 | 5 | **抓到 0 筆或 <上次 50% → 中止，不寫檔** | 否則幾千筆會被誤標「已下架」；已下架的保留 7 天標 `gone` |
 | 6 | **遠端 `__NUXT__` 只能在 `vm.runInNewContext` 空 context 求值** | 那是 591 的程式碼，不可信；禁止 `eval` |
-| 7 | **`site/data.json` 不進 git** | 每 30 分鐘一個 commit 會把 repo 撐爆；跨輪連續性靠 Actions cache |
+| 7 | **`site/data.json` 不進 main；由 `tools/publish.sh` force push 到孤兒分支 `data`** | 歷史不成長；跨輪連續性靠 Mac 本機留著上一次的 data.json |
+| 7b | **591 擋 GitHub Actions 的 IP（CloudFront 403）**，抓取只能在台灣的機器跑 | ADR-0003；別再嘗試把 scrape 放回 Actions |
 | 8 | **面板／滑卡要開就 `pushState`，關閉一律走 `history.back()`** | 手機返回手勢＝關面板回看板；直接移 DOM 會讓 history 對不上 |
 | 9 | **「排除」≠「已看」** | `rent591.hidden` 是不想再看到；`rent591.seen` 只是滑過／開過，在「全部」裡仍要顯示 |
 | 10 | **價格是數字（`toNum` 去逗號）；`extraFee` 另計** | 「總額」= `price + extraFee`；區間與排序依 `F.basis` 決定用哪個 |
@@ -72,4 +74,4 @@ This project runs on the agent framework (`docs/rules`):
 
 ## Current focus
 
-M1 收尾：滑卡模式（T-001）、手機版（T-002）、推上 GitHub 開始自動更新（T-003）。與 STATE.md 同步。
+M1 收尾：本機排程抓取＋發布（T-009）；使用者設 Pages 來源。與 STATE.md 同步。

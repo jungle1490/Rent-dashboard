@@ -22,6 +22,9 @@ Tier legend: **low** = any model · **mid** = capable coding model · **TOP** = 
 
 - [ ] **T-008** 文字抽取補強：地標→行政區（天母→士林區、東區→大安區…）、插字的步行距離、多房價（「12000／14000／16000」取區間） — mid
 
+- [ ] **T-009** 抓取改到 Mac 排程 + 孤兒分支 data 發布（591 擋 Actions IP，ADR-0003）— mid
+- [ ] **T-010** FB 每日自動抽取：AppleScript 驅動已登入的 Chrome 執行 fb-extract.js → fb-import → 併入 run-local.sh — mid
+
 ## Later
 
 - [ ] 收藏／排除／已看跨裝置同步（見 QUESTIONS.md）

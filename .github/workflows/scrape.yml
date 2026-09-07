@@ -1,11 +1,12 @@
-name: 抓取 591 租屋資料
+name: 發布看板
+
+# 抓取在使用者的 Mac 上跑（ADR-0003：591 擋 GitHub 的機房 IP），結果 force push 到孤兒分支 data。
+# 這裡只把 data 分支的檔案疊到 site/ 然後部署 Pages。
 
 on:
-  schedule:
-    - cron: '*/30 * * * *'   # 每 30 分鐘（GitHub 排程為盡力而為，尖峰時可能延後幾分鐘）
-  workflow_dispatch:          # 也可以到 Actions 頁面手動觸發
-  push:                       # 提交 site/fb.json 或改網頁時立即重新部署
-    paths: ['site/**', 'core/**']
+  push:
+    branches: [main, data]
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -14,50 +15,35 @@ permissions:
 
 concurrency:
   group: pages
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
-  scrape-and-deploy:
+  deploy:
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 10
     environment:
       name: github-pages
       url: ${{ steps.deploy.outputs.page_url }}
-
     steps:
       - uses: actions/checkout@v4
+        with: { ref: main }
 
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-
-      # 取回上一次的結果：用來判斷哪些是「新上架」、保留首次出現時間
-      - name: 還原上次的資料
-        uses: actions/cache/restore@v4
-        with:
-          path: site/data.json
-          key: rent-data-${{ github.run_id }}
-          restore-keys: rent-data-
-
-      - name: 抓取
-        run: node scrape.mjs
-
-      - name: 保存這次的資料
-        uses: actions/cache/save@v4
-        if: always()
-        with:
-          path: site/data.json
-          key: rent-data-${{ github.run_id }}
+      - name: 取 data 分支的抓取結果
+        run: |
+          if git fetch --depth=1 origin data 2>/dev/null; then
+            git show origin/data:data.json > site/data.json
+            git show origin/data:fb.json > site/fb.json 2>/dev/null || true
+            echo "data.json $(du -h site/data.json | cut -f1)"
+          else
+            echo "::warning::還沒有 data 分支：Mac 尚未跑過 tools/run-local.sh，先發布沒有資料的網頁"
+          fi
 
       - name: 把網頁會 import 的 core 模組複製到 site/
         run: cp core/text-extract.mjs core/fb-listing.mjs site/
 
       - uses: actions/configure-pages@v5
-
       - uses: actions/upload-pages-artifact@v3
-        with:
-          path: site
-
+        with: { path: site }
       - name: 發布到 GitHub Pages
         id: deploy
         uses: actions/deploy-pages@v4
