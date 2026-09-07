@@ -23,7 +23,9 @@ _Last rewritten: 2026-09-08 by Claude Fable 5.1（session-end）._
 - 房源卡片／面板／滑卡顯示時間：591 用 `refreshTime`（X 小時內更新）＋首次出現；FB 用 `postedAt`（永久連結 aria-label 的完整日期，VERIFIED）＋首次出現。FB 匯入只留最近 30 天（`core/fb-listing.mjs` KEEP_DAYS）。
 - **遠端叫 Mac 抓**（T-011，VERIFIED）：看板「⚡ 請 Mac 抓新資料」→ GitHub Run workflow `refresh.yml` → refresh 分支時間戳 → Mac launchd `com.rent-dashboard.poll` 每 5 分鐘 `poll-refresh.sh` → run-local.sh。任何能按 workflow 的東西（手機 GitHub App、gh、cloud routine）都能觸發。
 - `fb-extract.js` 支援社團搜尋結果頁（全文＋圖較齊、可先篩「最新／發佈日期」，但無永久連結與日期）。
-- T-010（FB 每日自動抽取）未開始。
+- 滑卡左滑＝排除＋已看（T-013）。
+- Claude 雲端 routine：建立被拒（HTTP 401「Connect your GitHub account」），需使用者到 claude.ai 連 GitHub 後再建；routine 的作用只是每天 12:00 往 refresh 分支寫時間戳。
+- T-010（FB 每日自動抽取）未開始；subagent 正用 Chrome 抽 4 個社團到 logs/fb-inbox/。
 
 ## Next (ordered)
 

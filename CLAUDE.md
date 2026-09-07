@@ -56,7 +56,7 @@ Source of truth: `docs/CONVENTIONS.md`. The most-violated ones:
 | 7 | **`site/data.json` 不進 main；由 `tools/publish.sh` force push 到孤兒分支 `data`** | 歷史不成長；跨輪連續性靠 Mac 本機留著上一次的 data.json |
 | 7b | **591 擋 GitHub Actions 的 IP（CloudFront 403）**，抓取只能在台灣的機器跑 | ADR-0003；別再嘗試把 scrape 放回 Actions |
 | 8 | **面板／滑卡要開就 `pushState`，關閉一律走 `history.back()`** | 手機返回手勢＝關面板回看板；直接移 DOM 會讓 history 對不上 |
-| 9 | **「排除」≠「已看」** | `rent591.hidden` 是不想再看到；`rent591.seen` 只是滑過／開過，在「全部」裡仍要顯示 |
+| 9 | **「排除」≠「已看」；滑卡左滑＝排除＋已看，右滑＝收藏＋已看** | `rent591.hidden` 不再顯示（「已排除」分頁可找回）；`rent591.seen` 只是看過 |
 | 10 | **價格是數字（`toNum` 去逗號）；`extraFee` 另計** | 「總額」= `price + extraFee`；區間與排序依 `F.basis` 決定用哪個 |
 
 ## Rules

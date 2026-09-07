@@ -27,7 +27,7 @@
 - 篩選狀態集中在 `F`，變更後呼叫 `render()`；`render(true)` 保留已展開的筆數（收藏／排除／已看時用），`render()` 重設為 60 筆。
 - 覆蓋層一律 `history.pushState` 開、`history.back()` 關；`popstate` 是唯一移除 DOM 的地方。
   z-index：滑卡 45 < 詳細面板 50 < 篩選抽屜 55。
-- 三種使用者標記各自獨立：`saved`（收藏）、`hidden`（排除，不顯示）、`seen`（已看，仍顯示）。
+- 三種使用者標記各自獨立：`saved`（收藏）、`hidden`（排除，不顯示）、`seen`（已看，仍顯示）。滑卡：左滑＝hidden+seen、右滑＝saved+seen（T-013）。
 - 「新上架」徽章只在 `NEW_MEANINGFUL` 為真時顯示（首輪全是新的就整個關掉）。
 - 圖片 `loading="lazy"`；一次最多塞 60 張卡片進 DOM。
 

@@ -911,10 +911,10 @@ function swDraw() {
     <div class="stage">
       ${next ? swCard(next, 'back') : ''}
       ${cur ? swCard(cur, 'front')
-            : `<div class="swempty"><b>都看完了</b>${empty}<br><br>左滑跳過的物件在看板「全部」裡都還在</div>`}
+            : `<div class="swempty"><b>都看完了</b>${empty}<br><br>左滑排除的物件在看板「已排除」分頁</div>`}
     </div>
     <div class="swacts">
-      <button class="no"  data-sw="no"   ${cur ? '' : 'disabled'} title="跳過（←）">✕</button>
+      <button class="no"  data-sw="no"   ${cur ? '' : 'disabled'} title="排除（←）">✕</button>
       <button class="un"  data-sw="undo" ${SW.hist.length ? '' : 'disabled'} title="返回上一張（Backspace）">↩</button>
       <button class="yes" data-sw="yes"  ${cur ? '' : 'disabled'} title="收藏（→）">★</button>
     </div>`;
@@ -938,7 +938,7 @@ function swCard(l, pos) {
     ${ph.length ? `<img src="${ph[idx]}" alt="" draggable="false">` : `<div style="position:absolute;inset:0;display:grid;place-items:center;color:#888">${l.source === 'fb' ? `圖片 ${l.imageCount || 0} 張，在 Facebook 原文` : '無圖片'}</div>`}
     <div class="dots">${ph.map((_, i) => `<i class="${i === idx ? 'on' : ''}"></i>`).join('')}</div>
     ${isNew(l) ? '<span class="nb">新上架</span>' : ''}${l.source === 'fb' ? '<span class="nb" style="background:#1877f2;left:auto;right:12px">FB</span>' : ''}
-    <div class="stamp like">收藏</div><div class="stamp nope">跳過</div>
+    <div class="stamp like">收藏</div><div class="stamp nope">排除</div>
     <div class="info">
       <div class="p">${D.price(l)}</div>
       ${feeLine ? `<div class="f">${feeLine}</div>` : ''}
@@ -997,10 +997,11 @@ function swFly(card, dir, done) {
 }
 function swCommit(l, act) {
   if (!l || LS.seen.has(l.id)) return;   // 防連點：同一張只處理一次
-  const wasSaved = LS.saved.has(l.id);
+  const wasSaved = LS.saved.has(l.id), wasHidden = LS.hidden.has(l.id);
   if (act === 'yes' && !wasSaved) { LS.saved.add(l.id); persist('saved'); }
+  if (act === 'no' && !wasHidden) { LS.hidden.add(l.id); persist('hidden'); }   // 左滑＝排除（T-013）
   LS.seen.add(l.id); persist('seen');
-  SW.hist.push({ l, act, wasSaved });
+  SW.hist.push({ l, act, wasSaved, wasHidden });
   SW.force = null; SW.photo = 0;
   render(true);   // 會順便 swDraw()
 }
@@ -1008,6 +1009,7 @@ function swUndo() {
   const h = SW.hist.pop(); if (!h) return;
   LS.seen.delete(h.l.id); persist('seen');
   if (h.act === 'yes' && !h.wasSaved) { LS.saved.delete(h.l.id); persist('saved'); }
+  if (h.act === 'no' && !h.wasHidden) { LS.hidden.delete(h.l.id); persist('hidden'); }
   SW.force = h.l; SW.photo = 0;
   render(true);
 }

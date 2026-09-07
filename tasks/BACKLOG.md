@@ -31,6 +31,8 @@ Tier legend: **low** = any model · **mid** = capable coding model · **TOP** = 
       VERIFIED 不用登入／deviceid；欄位與 __NUXT__ 相同（56 欄）；分頁不是 `page=`（page=2 回同一頁），回應有 `firstRow`，應改 `firstRow=30,60…` 實測。
       好處：不用 vm 沙箱、不受 HTML 改版影響。仍只能從台灣 IP 打（Actions 一樣被 CloudFront 403）。core 為 FROZEN，需卡片。
 
+- [x] **T-013** 滑卡左滑＝排除（可在「已排除」找回；返回可還原）— low（2026-09-08 完成，6 項斷言）
+
 ## Later
 
 - [ ] 收藏／排除／已看跨裝置同步（見 QUESTIONS.md）

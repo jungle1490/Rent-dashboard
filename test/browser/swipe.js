@@ -12,7 +12,7 @@
   R.remain0 = remain();
   const a = frontId();
   document.querySelector('[data-sw=no]').click(); await wait(400);
-  R.leftSeen = seen().includes(a); R.leftNotHidden = !hidden().includes(a); R.leftNotSaved = !saved().includes(a);
+  R.leftSeen = seen().includes(a); R.leftHidden = hidden().includes(a); R.leftNotSaved = !saved().includes(a);
   R.frontChanged = frontId() !== a;
   const b = frontId();
   document.querySelector('[data-sw=yes]').click(); await wait(400);
@@ -20,7 +20,7 @@
   document.querySelector('[data-sw=undo]').click(); await wait(300);
   R.undoFront = frontId() === b; R.undoUnseen = !seen().includes(b); R.undoUnsaved = !saved().includes(b);
   document.querySelector('[data-sw=undo]').click(); await wait(300);
-  R.undoTwiceFront = frontId() === a; R.undoBtnDisabled = document.querySelector('[data-sw=undo]').disabled;
+  R.undoTwiceFront = frontId() === a; R.undoUnhidden = !hidden().includes(a); R.undoBtnDisabled = document.querySelector('[data-sw=undo]').disabled;
   document.querySelector('.sc.front [data-det]').click(); await wait(300);
   R.detailOverSwipe = !!document.querySelector('.ov') && !!document.querySelector('.sw');
   R.detailFromSwipeNotSeen = !seen().includes(a);
@@ -35,9 +35,13 @@
   R.closedByBack = !document.querySelector('.sw');
   document.querySelector('#resetAll').click();
   const cardOf = (id) => [...document.querySelectorAll('.card')].find((c) => c.querySelector('.ttl')?.href.endsWith('/' + id) || c.querySelector('.ttl')?.href.includes('/' + id + '/'));
-  R.skippedVisibleInAll = !!cardOf(a) && cardOf(a).querySelector('.badge.seen')?.textContent === '已看';
-  document.querySelector('[data-view=unseen]').click();
-  R.skippedHiddenInUnseen = !cardOf(a);
+  // 這時 a 已被 undo 還原（未排除）；再左滑一次驗證排除分頁
+  document.querySelector('#swOpen, #mSwipe').click(); await wait(300);
+  const z = frontId(); document.querySelector('[data-sw=no]').click(); await wait(400); history.back(); await wait(350);
+  document.querySelector('#resetAll').click();
+  R.excludedNotInAll = !cardOf(z);
+  document.querySelector('[data-view=hidden]').click();
+  R.excludedInHiddenTab = !!cardOf(z);
   document.querySelector('[data-view=active]').click();
   R.allTrue = Object.values(R).filter((v) => typeof v === 'boolean').every(Boolean);
   return R;
