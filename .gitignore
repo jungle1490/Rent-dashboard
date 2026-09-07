@@ -4,3 +4,6 @@ node_modules/
 # 抓取結果不進版控：每 30 分鐘一次的 commit 會把 repo 撐大。
 # 資料由 Actions 產生後直接發布到 Pages，跨輪的連續性靠 Actions cache。
 docs/data.json
+
+# 本機設定，不進版控
+.claude/settings.local.json
