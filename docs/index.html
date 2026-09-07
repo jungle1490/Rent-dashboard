@@ -139,7 +139,11 @@ select{width:100%;padding:6px 8px;border:1px solid var(--line);border-radius:7px
         <input type="number" id="pMax" placeholder="不限" step="1000">
       </div>
       <div class="chips" style="margin-top:7px">
-        <button class="chip sub" data-fee="all" aria-pressed="true">租金不限額外費用</button>
+        <button class="chip sub" data-basis="rent">區間比租金</button>
+        <button class="chip sub" data-basis="total">區間比總額（含額外費用）</button>
+      </div>
+      <div class="chips" style="margin-top:5px">
+        <button class="chip sub" data-fee="all" aria-pressed="true">不限額外費用</button>
         <button class="chip sub" data-fee="none" aria-pressed="false">只看無額外費用</button>
       </div>
     </div>
@@ -208,7 +212,7 @@ const persist = (k) => localStorage.setItem('rent591.' + k, JSON.stringify([...L
 
 const F = {  // 目前篩選狀態
   lines:new Set(), stations:new Set(), districts:new Set(), layouts:new Set(),
-  kinds:new Set(), tags:new Set(), contains:new Set(), role:'all', fee:'all', dist:2000,
+  kinds:new Set(), tags:new Set(), contains:new Set(), role:'all', fee:'all', basis:'rent', dist:2000,
   pMin:null, pMax:null, aMin:null, aMax:null, view:'active', sort:'new',
 };
 const SAVED_F = 'rent591.filters';
@@ -248,8 +252,10 @@ function matches(l) {
   }
   if (F.dist < 2000) { if (l.stationDist == null || l.stationDist > F.dist) return false; }
   if (F.districts.size && !F.districts.has(l.district)) return false;
-  if (F.pMin != null && l.price < F.pMin) return false;
-  if (F.pMax != null && l.price > F.pMax) return false;
+  // 「總額」把額外費用一起算進去，避免 29,000 + 3,000 管理費被當成 3 萬以內
+  const effPrice = F.basis === 'total' ? l.price + (l.extraFee || 0) : l.price;
+  if (F.pMin != null && effPrice < F.pMin) return false;
+  if (F.pMax != null && effPrice > F.pMax) return false;
   if (F.fee === 'none' && l.extraFee > 0) return false;
   if (F.aMin != null && l.area < F.aMin) return false;
   if (F.aMax != null && l.area > F.aMax) return false;
@@ -267,10 +273,11 @@ function layoutBucket(l) {
   const n = +m[1];
   return n >= 3 ? '3房以上' : n + '房';
 }
+const eff = (l) => F.basis === 'total' ? l.price + (l.extraFee || 0) : l.price;
 const SORTS = {
   new:       (a,b) => new Date(b.firstSeen) - new Date(a.firstSeen),
-  priceAsc:  (a,b) => a.price - b.price,
-  priceDesc: (a,b) => b.price - a.price,
+  priceAsc:  (a,b) => eff(a) - eff(b),
+  priceDesc: (a,b) => eff(b) - eff(a),
   areaDesc:  (a,b) => b.area - a.area,
   unit:      (a,b) => (a.price/(a.area||1e9)) - (b.price/(b.area||1e9)),
   distAsc:   (a,b) => (a.stationDist ?? 1e9) - (b.stationDist ?? 1e9),
@@ -343,6 +350,10 @@ function renderFilters() {
     tc.append(chip(t, F.tags.has(t), () => { toggle(F.tags, t); render(); }, 'sub'));
   }
   // 額外費用
+  document.querySelectorAll('[data-basis]').forEach((b) => {
+    b.setAttribute('aria-pressed', F.basis === b.dataset.basis ? 'true' : 'false');
+    b.onclick = () => { F.basis = b.dataset.basis; render(); };
+  });
   document.querySelectorAll('[data-fee]').forEach((b) => {
     b.setAttribute('aria-pressed', F.fee === b.dataset.fee ? 'true' : 'false');
     b.onclick = () => { F.fee = b.dataset.fee; render(); };
@@ -467,7 +478,7 @@ function bind() {
     b.onclick = () => { F[b.dataset.clear].clear(); if (b.dataset.clear === 'lines') F.stations.clear(); render(); });
   $('#resetAll').onclick = () => {
     Object.assign(F, {lines:new Set(),stations:new Set(),districts:new Set(),layouts:new Set(),
-      kinds:new Set(),tags:new Set(),contains:new Set(),role:'all',fee:'all',dist:2000,
+      kinds:new Set(),tags:new Set(),contains:new Set(),role:'all',fee:'all',basis:'rent',dist:2000,
       pMin:null,pMax:null,aMin:null,aMax:null});
     render();
   };
