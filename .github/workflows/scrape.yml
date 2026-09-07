@@ -5,7 +5,9 @@ name: 發布看板
 
 on:
   push:
-    branches: [main, data]
+    branches:
+      - main
+      - data
   workflow_dispatch:
 
 permissions:
@@ -26,7 +28,8 @@ jobs:
       url: ${{ steps.deploy.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
-        with: { ref: main }
+        with:
+          ref: main
 
       - name: 取 data 分支的抓取結果
         run: |
@@ -38,12 +41,15 @@ jobs:
             echo "::warning::還沒有 data 分支：Mac 尚未跑過 tools/run-local.sh，先發布沒有資料的網頁"
           fi
 
-      - name: 把網頁會 import 的 core 模組複製到 site/
+      - name: 複製網頁會 import 的 core 模組
         run: cp core/text-extract.mjs core/fb-listing.mjs site/
 
       - uses: actions/configure-pages@v5
+
       - uses: actions/upload-pages-artifact@v3
-        with: { path: site }
+        with:
+          path: site
+
       - name: 發布到 GitHub Pages
         id: deploy
         uses: actions/deploy-pages@v4
