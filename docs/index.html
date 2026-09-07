@@ -103,6 +103,42 @@ select{width:100%;padding:6px 8px;border:1px solid var(--line);border-radius:7px
 .tagrow{display:flex;flex-wrap:wrap;gap:4px;margin-top:auto;padding-top:4px}
 .tg{font-size:10.5px;padding:2px 6px;border-radius:4px;background:var(--bg);color:var(--muted);border:1px solid var(--line)}
 .empty{padding:60px 20px;text-align:center;color:var(--muted)}
+
+/* ---- 詳細面板 ---- */
+.ov{position:fixed;inset:0;z-index:50;background:rgba(0,0,0,.55);backdrop-filter:blur(3px);
+  display:flex;align-items:center;justify-content:center;padding:20px}
+@media(max-width:700px){ .ov{padding:0;align-items:stretch} }
+.dlg{background:var(--panel);border-radius:12px;max-width:880px;width:100%;max-height:100%;
+  overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.35);position:relative}
+@media(max-width:700px){ .dlg{border-radius:0} }
+.dlg .x{position:absolute;top:12px;right:12px;z-index:2;width:34px;height:34px;border:0;border-radius:9px;
+  background:rgba(0,0,0,.62);color:#fff;font-size:17px;backdrop-filter:blur(4px)}
+.gal{position:relative;background:#000}
+.gal img{width:100%;aspect-ratio:4/3;object-fit:contain;display:block}
+.gal .nav{position:absolute;top:50%;transform:translateY(-50%);width:38px;height:38px;border:0;
+  border-radius:50%;background:rgba(0,0,0,.5);color:#fff;font-size:16px}
+.gal .nav.prev{left:10px} .gal .nav.next{right:10px}
+.gal .idx{position:absolute;bottom:10px;right:12px;background:rgba(0,0,0,.6);color:#fff;
+  font-size:11.5px;padding:3px 8px;border-radius:5px}
+.strip{display:flex;gap:6px;padding:8px;overflow-x:auto;background:var(--bg)}
+.strip img{width:64px;height:48px;object-fit:cover;border-radius:5px;cursor:pointer;opacity:.55;flex:none}
+.strip img.on{opacity:1;outline:2px solid var(--accent)}
+.dbody{padding:16px 18px 18px}
+.dprice{font-size:26px;font-weight:700;letter-spacing:-.02em}
+.dprice small{font-size:12px;font-weight:400;color:var(--muted);margin-left:4px}
+.dsum{font-size:12.5px;margin:4px 0 12px}
+.dttl{font-size:16px;font-weight:600;line-height:1.5;margin:0 0 12px}
+.facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;
+  padding:12px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.fact .k{font-size:11px;color:var(--muted);margin-bottom:2px}
+.fact .v{font-size:13.5px;font-weight:500}
+.dtags{display:flex;flex-wrap:wrap;gap:5px;margin:12px 0}
+.dacts{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.dacts button,.dacts a{flex:1;min-width:130px;text-align:center;padding:10px 14px;border-radius:9px;
+  border:1px solid var(--line);background:transparent;text-decoration:none;font-size:13.5px;font-weight:500}
+.dacts .go{background:var(--accent);border-color:var(--accent);color:#fff}
+.dacts .on{background:var(--star);border-color:var(--star);color:#1a1a18}
+.hint{font-size:11.5px;color:var(--muted);text-align:center;margin-top:10px}
 .err{padding:16px;border:1px solid var(--warn);border-radius:var(--radius);color:var(--warn);background:var(--panel)}
 </style>
 </head>
@@ -410,6 +446,14 @@ function card(l) {
       <div class="tagrow">${l.tags.slice(0,5).map((t)=>`<span class="tg">${escapeHtml(t)}</span>`).join('')}</div>
     </div>`;
 
+  for (const a of el.querySelectorAll('.thumb, .ttl')) {
+    a.addEventListener('click', (e) => {
+      // 讓 cmd/ctrl/shift+click 和中鍵維持原本「在新分頁開 591」的行為
+      if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
+      e.preventDefault();
+      openDetail(l);
+    });
+  }
   el.querySelector('[data-act=save]').onclick = () => {
     LS.saved.has(l.id) ? LS.saved.delete(l.id) : LS.saved.add(l.id); persist('saved'); render();
   };
@@ -465,6 +509,131 @@ function render() {
   if (shown < list.length) { out.append(moreBtn); moreBtn.onclick = showMore; io.observe(moreBtn); }
 }
 
+/* ---------- 詳細面板 ----------
+   用 history.pushState 開啟，所以瀏覽器「上一頁」就是關閉面板回到看板，
+   不會整個離開清單、也不用重設篩選條件。手機的返回手勢同理。            */
+let BY_ID = new Map();
+let galIdx = 0, galPhotos = [];
+
+function openDetail(l) {
+  history.pushState({ detail: l.id }, '', '#p' + l.id);
+  showDetail(l);
+}
+function showDetail(l) {
+  galPhotos = (l.photos && l.photos.length ? l.photos : [l.cover]).filter(Boolean);
+  galIdx = 0;
+  let ov = document.querySelector('.ov');
+  if (!ov) {
+    ov = document.createElement('div');
+    ov.className = 'ov';
+    ov.addEventListener('click', (e) => { if (e.target === ov) closeDetail(); });
+    document.body.append(ov);
+  }
+  document.body.style.overflow = 'hidden';
+  ov.innerHTML = detailHtml(l);
+  wireDetail(ov, l);
+}
+function closeDetail() {
+  // 統一走 history：按 ✕ / Esc / 點背景都等同上一頁，狀態才不會對不上
+  if (history.state && history.state.detail) history.back();
+  else hideDetail();
+}
+function hideDetail() {
+  document.querySelector('.ov')?.remove();
+  document.body.style.overflow = '';
+}
+window.addEventListener('popstate', (e) => {
+  const id = e.state && e.state.detail;
+  if (!id) return hideDetail();
+  const l = BY_ID.get(id);
+  l ? showDetail(l) : hideDetail();
+});
+document.addEventListener('keydown', (e) => {
+  if (!document.querySelector('.ov')) return;
+  if (e.key === 'Escape') closeDetail();
+  if (e.key === 'ArrowRight') gal(1);
+  if (e.key === 'ArrowLeft') gal(-1);
+});
+
+function gal(d) {
+  if (galPhotos.length < 2) return;
+  galIdx = (galIdx + d + galPhotos.length) % galPhotos.length;
+  const ov = document.querySelector('.ov'); if (!ov) return;
+  ov.querySelector('.gal img').src = galPhotos[galIdx];
+  ov.querySelector('.idx').textContent = `${galIdx + 1} / ${galPhotos.length}`;
+  ov.querySelectorAll('.strip img').forEach((t, i) => t.classList.toggle('on', i === galIdx));
+}
+
+function detailHtml(l) {
+  const inc = (l.contains || []).map((c) => CONTAIN_LABEL[c] || c);
+  const total = l.price + (l.extraFee || 0);
+  const sum = l.extraFee > 0
+    ? `<div class="dsum fee">＋額外費用 ${l.extraFee.toLocaleString()} 元/月　→　每月合計約 <b>${total.toLocaleString()}</b> 元</div>`
+    : inc.length ? `<div class="dsum fee inc">租金已含 ${inc.join('、')}</div>`
+                 : `<div class="dsum fee none">未註明額外費用</div>`;
+
+  const facts = [
+    ['房型', l.layout || '—'], ['坪數', l.area ? l.area + ' 坪' : '—'],
+    ['樓層', l.floor || '—'], ['類型', l.kind || '—'],
+    ['每坪租金', l.area ? Math.round(l.price / l.area).toLocaleString() + ' 元' : '—'],
+    ['裝潢', l.fitment || '—'],
+    ['捷運', l.station ? `${l.station} ${l.stationDist ?? '?'} 公尺` : '非捷運周邊'],
+    ['路線', l.lines.length ? l.lines.join('／') : '—'],
+    ['行政區', l.district || '—'], ['出租方', l.role || '—'],
+    ['社區', l.community || '—'],
+    ['首次出現', new Date(l.firstSeen).toLocaleDateString('zh-TW', {month:'numeric', day:'numeric'})],
+  ];
+
+  return `<div class="dlg" role="dialog" aria-modal="true">
+    <button class="x" data-x title="關閉（Esc 或上一頁）">✕</button>
+    <div class="gal">
+      <img src="${galPhotos[0] || ''}" alt="">
+      ${galPhotos.length > 1 ? `<button class="nav prev" data-g="-1">‹</button>
+        <button class="nav next" data-g="1">›</button>
+        <span class="idx">1 / ${galPhotos.length}</span>` : ''}
+    </div>
+    ${galPhotos.length > 1 ? `<div class="strip">${galPhotos.map((p, i) =>
+      `<img src="${p}" data-t="${i}" class="${i === 0 ? 'on' : ''}" loading="lazy" alt="">`).join('')}</div>` : ''}
+    <div class="dbody">
+      <div class="dprice">${l.price.toLocaleString()}<small>元/月</small></div>
+      ${sum}
+      <h2 class="dttl">${escapeHtml(l.title)}</h2>
+      <div class="meta" style="font-size:12.5px">${escapeHtml(l.address)}</div>
+      <div class="facts">${facts.map(([k, v]) =>
+        `<div class="fact"><div class="k">${k}</div><div class="v">${escapeHtml(v)}</div></div>`).join('')}</div>
+      <div class="dtags">${l.tags.map((t) => `<span class="tg">${escapeHtml(t)}</span>`).join('')}</div>
+      <div class="dacts">
+        <button data-act="save" class="${LS.saved.has(l.id) ? 'on' : ''}">${LS.saved.has(l.id) ? '★ 已收藏' : '☆ 收藏'}</button>
+        <button data-act="hide">${LS.hidden.has(l.id) ? '↺ 取消排除' : '✕ 排除這筆'}</button>
+        <a class="go" href="${l.url}" target="_blank" rel="noopener">在 591 開啟 ↗</a>
+      </div>
+      <div class="hint">屋況說明、格局圖和聯絡方式要到 591 才看得到　·　按上一頁或 Esc 回看板</div>
+    </div>
+  </div>`;
+}
+
+function wireDetail(ov, l) {
+  ov.querySelector('[data-x]').onclick = closeDetail;
+  ov.querySelectorAll('[data-g]').forEach((b) => b.onclick = () => gal(+b.dataset.g));
+  ov.querySelectorAll('.strip img').forEach((t) =>
+    t.onclick = () => gal(+t.dataset.t - galIdx));
+  const sv = ov.querySelector('[data-act=save]');
+  sv.onclick = () => {
+    LS.saved.has(l.id) ? LS.saved.delete(l.id) : LS.saved.add(l.id);
+    persist('saved');
+    const on = LS.saved.has(l.id);
+    sv.classList.toggle('on', on); sv.textContent = on ? '★ 已收藏' : '☆ 收藏';
+    render();   // 只重畫背後的清單，面板和相簿位置保持不動
+  };
+  const hd = ov.querySelector('[data-act=hide]');
+  hd.onclick = () => {
+    LS.hidden.has(l.id) ? LS.hidden.delete(l.id) : LS.hidden.add(l.id);
+    persist('hidden');
+    hd.textContent = LS.hidden.has(l.id) ? '↺ 取消排除' : '✕ 排除這筆';
+    render();
+  };
+}
+
 /* ---------- 事件 ---------- */
 function bind() {
   $('#dist').oninput = (e) => { F.dist = +e.target.value; render(); };
@@ -515,8 +684,12 @@ let DISTRICTS = [], DISTRICT_COUNT = {}, STATION_COUNT = {}, TAG_COUNT = {},
   const dt = new Date(DATA.updatedAt);
   $('#stamp').innerHTML = `資料更新於 <b>${dt.toLocaleString('zh-TW',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'})}</b>` +
     `　·　共 ${DATA.count.toLocaleString()} 筆　·　資料來源 591`;
+  BY_ID = new Map(DATA.listings.map((l) => [l.id, l]));
   bind();
   render();
+  // 網址帶 #p<id> 時直接開該筆（分享連結、重新整理都能回到原本看的物件）
+  const m = location.hash.match(/^#p(\d+)$/);
+  if (m && BY_ID.has(+m[1])) { history.replaceState({ detail: +m[1] }, '', location.hash); showDetail(BY_ID.get(+m[1])); }
 })();
 </script>
 </body>

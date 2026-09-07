@@ -127,6 +127,8 @@ function normalize(raw) {
     lines,
     tags,
     cover: raw.cover || (raw.photoList || [])[0] || '',
+    // 詳細面板的相簿用。591 一筆最多給 8~15 張，取前 8 張夠看又不會讓檔案太肥。
+    photos: (raw.photoList || []).slice(0, 8),
     refreshTime: raw.refresh_time || '',
     browseCount: raw.browse_count ?? null,
     socialHouse: !!raw.social_house,
