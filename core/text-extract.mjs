@@ -139,10 +139,11 @@ export function extractListing(text, mrtLines) {
   const t = normalizeText(text);
   // 求租（房客找房）vs 出租：中文有強訊號就算；英文要「找房訊號」且沒有出租訊號，
   // 因為房東文常寫 "Looking for a hassle-free…"。「找室友／徵室友」是房東在找人，不算求租。
-  const seekZh = /#\s*求租|求租|我要租房|想租(?!金|屋補|補)|預算|入住成員|預計入住|徵求?.{0,4}(?:房|住處)/.test(t);
+  const strongZh = /#\s*求租|求租|徵租|我要租房|入住成員|求租人/.test(t);
+  const weakZh = /想租(?!金|屋補|補)|預算|預計入住/.test(t);
   const seekEn = /looking for (?:an? |a long.?term |long.?term )?(?:apartment|studio|room|flat|place|accommodation|rental)|will be staying in|just moved to taipei|exchange student|seeking (?:an? )?(?:apartment|room|flat)/i.test(t);
-  const offer = /出租|釋出|for rent|room available|available (?:from|now)|move-?in from|no agent fee|月租|租金[:：]|【案名|studio (?:suite|in|near)|immediate move/i.test(t);
-  const isSeeking = seekZh || (seekEn && !offer);
+  const offer = /出租|釋出|for rent|room available|available (?:from|now)|move-?in from|no agent fee|月租|租金[:：]|【案名|studio (?:suite|in|near)|immediate move|看房|看屋|預約/i.test(t);
+  const isSeeking = strongZh || ((weakZh || seekEn) && !offer);
   const isSale = /委託價|出售|售價|總價.{0,6}萬/.test(t) && !/出租/.test(t);
   const { district, outsideTaipei } = findDistrict(t);
   const { stationDist, approx } = findStationDist(t);
