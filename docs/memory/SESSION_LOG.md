@@ -14,5 +14,7 @@
 - ADR-0003：591 對 Actions 回 CloudFront 403 [VERIFIED 診斷 workflow]，抓取改 Mac launchd 每日 + 孤兒分支 data + Actions 只發布；T-009 程式完成、data 分支已推、launchd 已裝。
 - 發布 workflow startup_failure：三輪切分（14 個變體）證明任何 `uses:` 都失敗、純 run 成功；`gh api …/actions/permissions` = `local_only` [VERIFIED]。待使用者同意改回 `all`。
 - 使用者同意 → gh api 改 Actions 權限 `all`、Pages `build_type=workflow`；推送後發布 success；網址 200、data.json 5.7MB、fb.json、fb-listing.mjs 皆 200 [VERIFIED curl]。
-- Next: 看 `logs/` 確認首次 `run-local.sh` 全程成功；之後做 T-010（FB 每日自動）。
+- 首次 run-local 成功；發現推 data 分支不觸發發布 → publish.sh 加 `gh workflow run`，實測 dispatch success [VERIFIED]。
+- 加「更新資料」鈕；VERIFIED 591 回應無 `Access-Control-Allow-Origin`，網頁不能直接抓 591。
+- Next: 使用者決定 T-011（遠端叫醒 Mac）的觸發方式；T-010 FB 每日自動。
 

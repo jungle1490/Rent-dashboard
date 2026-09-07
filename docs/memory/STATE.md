@@ -18,12 +18,13 @@ _Last rewritten: 2026-09-08 by Claude Fable 5.1（session-end）._
 
 - **看板已上線**：https://jungle1490.github.io/Rent-dashboard/ HTTP 200，data.json 3,869 筆、fb.json 2 筆（VERIFIED curl，2026-09-08）。
   使用者同意後以 gh api 把 Actions 權限改回 `all`、Pages Source 設為 workflow；發布 run 34150554393 success。
-- launchd `com.rent-dashboard.daily` 已安裝（每天 08:00 跑 `tools/run-local.sh`）；首次完整本機執行在本 session 尾聲啟動，結果見 `logs/`。
+- launchd `com.rent-dashboard.daily` 已安裝（每天 08:00 跑 `tools/run-local.sh`）。首次完整本機執行 VERIFIED：3,911 筆 → data 分支 → `publish.sh` 以 `gh workflow run` 觸發發布 → 線上更新（推孤兒分支本身不會觸發 workflow）。
+- 看板有「↻ 更新資料」鈕：重新讀已發布的 data.json／fb.json，有變才重畫；切回分頁超過 5 分鐘自動檢查。它**不能**直接抓 591（VERIFIED 591 無 CORS header）。
 - T-010（FB 每日自動抽取）未開始。
 
 ## Next (ordered)
 
-1. 確認 `logs/run-*.log` 首次 launchd 路徑成功（抓取 → publish → 發布 run success）。
+1. 使用者決定「按鈕遠端叫醒 Mac 抓取」要不要做、用哪種觸發（GitHub UI 點一下＋Mac 輪詢／瀏覽器存 PAT／Tailscale Funnel）→ T-011。
 2. 使用者在登入 Chrome 對兩個社團跑 `tools/fb-extract.js`（459966811445588、305665579858865），貼進看板或交 agent 匯入。
 3. T-008 抽取補強：地標→行政區（天母→士林區）、插字步行距離、多房價取區間。
 4. T-004 抽出 `scrape.mjs` 的 core 純函式到 `core/` 並補測試（text-extract／fb-listing 已在 core/）。

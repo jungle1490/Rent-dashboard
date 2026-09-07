@@ -25,6 +25,8 @@ Tier legend: **low** = any model · **mid** = capable coding model · **TOP** = 
 - [x] **T-009** 抓取改到 Mac 排程 + 孤兒分支 data 發布（591 擋 Actions IP，ADR-0003）— mid（2026-09-08 完成：data 分支、發布 workflow 成功、launchd 每天 08:00）
 - [ ] **T-010** FB 每日自動抽取：AppleScript 驅動已登入的 Chrome 執行 fb-extract.js → fb-import → 併入 run-local.sh — mid
 
+- [ ] **T-011** 看板按鈕遠端叫醒 Mac 抓取：Mac 每 5 分鐘輪詢觸發訊號（GitHub UI 手動觸發／PAT／Tailscale Funnel 三選一）→ run-local.sh；頁面自動偵測到新資料 — mid（待使用者選觸發方式）
+
 ## Later
 
 - [ ] 收藏／排除／已看跨裝置同步（見 QUESTIONS.md）
