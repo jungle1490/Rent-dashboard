@@ -25,11 +25,12 @@ _Last rewritten: 2026-09-08 by init-project skill（專案已有可運作的程�
 - T-003 **已推送**（`1df2058`，遠端 SHA 一致，VERIFIED）。剩使用者在 GitHub 網頁：Settings → Pages → Source = GitHub Actions；Actions 手動跑第一次。網址 https://jungle1490.github.io/Rent-dashboard/
 - FB 社團房源：ADR-0002 定案「只在登入瀏覽器內抽取」。T-006 **完成**（VERIFIED）：`tools/fb-extract.js`（頁面內）、`core/text-extract.mjs`（純函式，`node --test` 10/10 ——專案第一個有單元測試的模組）、`tools/fb-import.mjs` → `site/fb.json`。實際從群組 459966811445588 抽到 2 篇並匯入。
 - 限制（VERIFIED）：agent 透過 Chrome 擴充功能代跑拿不到圖片網址（簽章 query string 被擋）；FB 動態載入極慢，8 次捲動只出 3 篇；第二個社團（305665579858865「大台北租屋網🌞房東盡量PO」）結構相同但頁面執行逾時，未實抽。
-- T-007（FB 進看板 UI）尚未開始。
+- T-007 **完成**（VERIFIED）：看板並行載入 `data.json` + `fb.json` + 本機匯入（`rent591.fbImport`）；來源晶片 591／FB；FB 卡片／面板／滑卡顯示「未標」而非 null；`null` 欄位篩選預設放行、「隱藏未標欄位」可排除；求租預設隱藏；面板顯示原文與「在 Facebook 開啟」；「匯入 FB 貼文」面板走 history，動態 `import('./fb-listing.mjs')` 在瀏覽器內抽取。
+- `core/fb-listing.mjs` 新增（原始貼文 → 物件，匯入腳本與網頁共用）；workflow 加 `push: paths [site/**, core/**]` 觸發並複製 core 模組到 site/；本機開發要先 `cp core/*.mjs site/`。
 
 ## Next (ordered)
 
-1. T-007 FB 房源進看板（合併 fb.json、貼上匯入、來源標示、未標欄位不排除、求租預設隱藏）。
-2. T-003 剩使用者：Pages Source = GitHub Actions、手動跑第一次。
-3. T-004 把 core 純函式抽成 `core/` 並用 `node --test` 補測試（站名解析、費用拆解、normalize）。
+1. 推送本輪 commit；T-003 剩使用者：Pages Source = GitHub Actions、手動跑第一次。
+2. 使用者在登入的 Chrome 跑 `tools/fb-extract.js`（兩個社團）貼進看板，或交給 agent 代跑（無圖）。
+3. T-004 把 core（text-extract／fb-listing 已在 core/，剩 scrape.mjs 的 normalize 等） 純函式抽成 `core/` 並用 `node --test` 補測試（站名解析、費用拆解、normalize）。
 4. 視需求：收藏／排除跨裝置同步（目前只在瀏覽器本機）。

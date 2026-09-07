@@ -15,8 +15,8 @@
 
 ```bash
 node --check scrape.mjs                                        # typecheck — must pass before "done"
-node --test                                                    # full test suite — 尚未建立，見 T-004；建立前以 scrape 煙霧測試代替
-node scrape.mjs && python3 -m http.server 8899 --directory site   # run the app locally → http://localhost:8899
+node --test                                                    # full test suite（core/text-extract 等；scrape 本體待 T-004）
+cp core/*.mjs site/ && node scrape.mjs && python3 -m http.server 8899 --directory site   # run locally → http://localhost:8899
 ```
 
 ## Architecture (details: docs/adr/)

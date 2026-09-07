@@ -104,6 +104,13 @@ select{width:100%;padding:6px 8px;border:1px solid var(--line);border-radius:7px
 .badge.drop{background:var(--warn)}
 .badge.gone{background:#666}
 .badge.seen{background:rgba(0,0,0,.45);font-weight:500}
+.badge.src{background:#1877f2}
+.badge.seek{background:#7c3aed}
+.unk{color:var(--muted);font-style:normal}
+.imp textarea{width:100%;min-height:180px;padding:10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);font:12px/1.5 ui-monospace,Menlo,monospace}
+.imp .msg{font-size:12.5px;margin-top:8px;color:var(--muted)}
+.imp .msg.err{color:var(--warn)}
+.raw{white-space:pre-wrap;font-size:13px;line-height:1.6;padding:12px;background:var(--bg);border-radius:8px;margin:12px 0;max-height:40vh;overflow:auto}
 .acts{position:absolute;top:8px;right:8px;display:flex;gap:5px}
 .acts button{width:29px;height:29px;border-radius:7px;border:0;background:rgba(0,0,0,.62);color:#fff;
   display:grid;place-items:center;font-size:14px;backdrop-filter:blur(4px);line-height:1}
@@ -219,6 +226,15 @@ aside.open .done{display:block;position:sticky;bottom:0;width:100%;padding:13px;
 
   <aside id="filters">
     <div class="grp">
+      <h3>來源 <button id="impOpen">匯入 FB 貼文</button></h3>
+      <div class="chips" id="srcChips"></div>
+      <div class="chips" style="margin-top:6px">
+        <button class="chip sub" id="hideUnk">隱藏未標欄位的物件</button>
+        <button class="chip sub" id="showSeek">顯示求租貼文</button>
+      </div>
+    </div>
+
+    <div class="grp">
       <h3>捷運路線 <button data-clear="lines">清除</button></h3>
       <div class="chips" id="lineChips"></div>
       <div id="stationBox"></div>
@@ -326,7 +342,8 @@ const persist = (k) => localStorage.setItem('rent591.' + k, JSON.stringify([...L
 
 const F = {  // 目前篩選狀態
   lines:new Set(), stations:new Set(), districts:new Set(), layouts:new Set(),
-  kinds:new Set(), tags:new Set(), contains:new Set(), role:'all', fee:'all', basis:'rent', dist:2000,
+  kinds:new Set(), tags:new Set(), contains:new Set(), sources:new Set(), role:'all', fee:'all', basis:'rent', dist:2000,
+  hideUnknown:false, showSeeking:false,
   pMin:null, pMax:null, aMin:null, aMax:null, view:'active', sort:'new',
 };
 const SAVED_F = 'rent591.filters';
@@ -337,10 +354,11 @@ try { Object.assign(F, JSON.parse(localStorage.getItem(SAVED_F) || '{}'),
    layouts:new Set(JSON.parse(localStorage.getItem(SAVED_F)||'{}').layouts||[]),
    kinds:new Set(JSON.parse(localStorage.getItem(SAVED_F)||'{}').kinds||[]),
    tags:new Set(JSON.parse(localStorage.getItem(SAVED_F)||'{}').tags||[]),
-   contains:new Set(JSON.parse(localStorage.getItem(SAVED_F)||'{}').contains||[])}); } catch {}
+   contains:new Set(JSON.parse(localStorage.getItem(SAVED_F)||'{}').contains||[]),
+   sources:new Set(JSON.parse(localStorage.getItem(SAVED_F)||'{}').sources||[])}); } catch {}
 const saveF = () => localStorage.setItem(SAVED_F, JSON.stringify({...F,
   lines:[...F.lines], stations:[...F.stations], districts:[...F.districts],
-  layouts:[...F.layouts], kinds:[...F.kinds], tags:[...F.tags], contains:[...F.contains]}));
+  layouts:[...F.layouts], kinds:[...F.kinds], tags:[...F.tags], contains:[...F.contains], sources:[...F.sources]}));
 
 const DISTRICT_ORDER = ['中正區','大同區','中山區','松山區','大安區','萬華區','信義區',
   '士林區','北投區','內湖區','南港區','文山區'];
@@ -359,22 +377,35 @@ const isNew = (l) => NEW_MEANINGFUL && !l.gone &&
   Date.now() - new Date(l.firstSeen).getTime() < NEW_MS;
 
 /* ---------- 篩選 ---------- */
+// 社群貼文抽不到的欄位是 null：篩選時「不知道」預設放行，開了「隱藏未標」才排除。
+// 591 的欄位永遠有值（沒捷運是 ''／null 但 source 不是 fb），行為跟以前一樣。
+const unk = (l, v) => l.source === 'fb' && (v == null || v === '');
 function matches(l) {
+  if (F.sources.size && !F.sources.has(l.source || '591')) return false;
+  if (l.isSeeking && !F.showSeeking) return false;
+  if (F.hideUnknown && l.source === 'fb' && (l.price == null || !l.district)) return false;
   if (F.lines.size) {
-    if (!l.lines.some((x) => F.lines.has(x))) return false;
-    if (F.stations.size && !F.stations.has(l.station)) return false;
+    if (unk(l, l.station)) { /* 不知道站，放行 */ }
+    else {
+      if (!l.lines.some((x) => F.lines.has(x))) return false;
+      if (F.stations.size && !F.stations.has(l.station)) return false;
+    }
   }
-  if (F.dist < 2000) { if (l.stationDist == null || l.stationDist > F.dist) return false; }
-  if (F.districts.size && !F.districts.has(l.district)) return false;
+  if (F.dist < 2000 && !unk(l, l.stationDist)) { if (l.stationDist == null || l.stationDist > F.dist) return false; }
+  if (F.districts.size && !unk(l, l.district) && !F.districts.has(l.district)) return false;
   // 「總額」把額外費用一起算進去，避免 29,000 + 3,000 管理費被當成 3 萬以內
-  const effPrice = F.basis === 'total' ? l.price + (l.extraFee || 0) : l.price;
-  if (F.pMin != null && effPrice < F.pMin) return false;
-  if (F.pMax != null && effPrice > F.pMax) return false;
+  const effPrice = l.price == null ? null : (F.basis === 'total' ? l.price + (l.extraFee || 0) : l.price);
+  if (effPrice != null) {
+    if (F.pMin != null && effPrice < F.pMin) return false;
+    if (F.pMax != null && effPrice > F.pMax) return false;
+  }
   if (F.fee === 'none' && l.extraFee > 0) return false;
-  if (F.aMin != null && l.area < F.aMin) return false;
-  if (F.aMax != null && l.area > F.aMax) return false;
-  if (F.layouts.size && !F.layouts.has(layoutBucket(l))) return false;
-  if (F.kinds.size && !F.kinds.has(l.kind)) return false;
+  if (l.area != null && l.area > 0) {
+    if (F.aMin != null && l.area < F.aMin) return false;
+    if (F.aMax != null && l.area > F.aMax) return false;
+  }
+  if (F.layouts.size && !unk(l, l.layout) && !F.layouts.has(layoutBucket(l))) return false;
+  if (F.kinds.size && !unk(l, l.kind) && !F.kinds.has(l.kind)) return false;
   if (F.role === 'owner' && !/屋主/.test(l.role)) return false;
   if (F.role === 'agent' && !/仲介|代理/.test(l.role)) return false;
   for (const t of F.tags) if (!l.tags.includes(t)) return false;
@@ -387,13 +418,14 @@ function layoutBucket(l) {
   const n = +m[1];
   return n >= 3 ? '3房以上' : n + '房';
 }
-const eff = (l) => F.basis === 'total' ? l.price + (l.extraFee || 0) : l.price;
+const eff = (l) => l.price == null ? null : (F.basis === 'total' ? l.price + (l.extraFee || 0) : l.price);
+const nz = (v, last) => (v == null ? last : v);   // 未標的排最後
 const SORTS = {
   new:       (a,b) => new Date(b.firstSeen) - new Date(a.firstSeen),
-  priceAsc:  (a,b) => eff(a) - eff(b),
-  priceDesc: (a,b) => eff(b) - eff(a),
-  areaDesc:  (a,b) => b.area - a.area,
-  unit:      (a,b) => (a.price/(a.area||1e9)) - (b.price/(b.area||1e9)),
+  priceAsc:  (a,b) => nz(eff(a), 1e12) - nz(eff(b), 1e12),
+  priceDesc: (a,b) => nz(eff(b), -1) - nz(eff(a), -1),
+  areaDesc:  (a,b) => nz(b.area, -1) - nz(a.area, -1),
+  unit:      (a,b) => (a.price && a.area ? a.price/a.area : 1e12) - (b.price && b.area ? b.price/b.area : 1e12),
   distAsc:   (a,b) => (a.stationDist ?? 1e9) - (b.stationDist ?? 1e9),
 };
 
@@ -454,6 +486,14 @@ function renderFilters() {
   for (const [v, label] of [['all','不限'],['owner','屋主直租'],['agent','仲介']]) {
     rc.append(chip(label, F.role === v, () => { F.role = v; render(); }, 'sub'));
   }
+  const sc = $('#srcChips'); sc.innerHTML = '';
+  for (const [v, label] of [['591', `591·${SRC_COUNT['591'] || 0}`], ['fb', `FB·${SRC_COUNT.fb || 0}`]]) {
+    sc.append(chip(label, F.sources.has(v), () => { toggle(F.sources, v); render(); }));
+  }
+  $('#hideUnk').setAttribute('aria-pressed', String(F.hideUnknown));
+  $('#hideUnk').onclick = () => { F.hideUnknown = !F.hideUnknown; render(); };
+  $('#showSeek').setAttribute('aria-pressed', String(F.showSeeking));
+  $('#showSeek').onclick = () => { F.showSeeking = !F.showSeeking; render(); };
   const cc = $('#containChips'); cc.innerHTML = '';
   for (const c of CONTAIN_ORDER.filter((c) => CONTAIN_COUNT[c])) {
     cc.append(chip(`${CONTAIN_LABEL[c] || c}·${CONTAIN_COUNT[c]}`, F.contains.has(c),
@@ -488,20 +528,20 @@ function card(l) {
   const badges = [];
   if (l.gone) badges.push('<span class="badge gone">已下架</span>');
   else if (isNew(l)) badges.push('<span class="badge new">新上架</span>');
+  if (l.source === 'fb') badges.push('<span class="badge src">FB</span>');
+  if (l.isSeeking) badges.push('<span class="badge seek">求租</span>');
   if (LS.seen.has(l.id)) badges.push('<span class="badge seen">已看</span>');
   if (l.prevPrice && l.prevPrice > l.price)
     badges.push(`<span class="badge drop">↓ ${(l.prevPrice - l.price).toLocaleString()}</span>`);
 
   const inc = (l.contains || []).map((c) => CONTAIN_LABEL[c] || c);
   const fee = l.extraFee > 0
-    ? `<div class="fee">＋額外費用 ${l.extraFee.toLocaleString()} 元/月（合計約 ${(l.price + l.extraFee).toLocaleString()}）</div>`
+    ? `<div class="fee">＋額外費用 ${l.extraFee.toLocaleString()} 元/月${l.price != null ? `（合計約 ${(l.price + l.extraFee).toLocaleString()}）` : ''}</div>`
+    : l.feeIncluded ? `<div class="fee inc">含管理費</div>`
     : inc.length
       ? `<div class="fee inc">租金含 ${inc.join('、')}</div>`
       : `<div class="fee none">未註明額外費用</div>`;
 
-  const mrt = l.station
-    ? `<div class="mrt">🚇 ${l.station}　${l.stationDist ?? '?'} 公尺　${l.lines.join('／') || ''}</div>`
-    : `<div class="mrt" style="color:var(--muted)">非捷運周邊</div>`;
 
   el.innerHTML = `
     <a class="thumb" href="${l.url}" target="_blank" rel="noopener">
@@ -513,15 +553,15 @@ function card(l) {
       <button data-act="hide" title="${LS.hidden.has(l.id) ? '取消排除' : '排除，不再顯示'}">${LS.hidden.has(l.id) ? '↺' : '✕'}</button>
     </div>
     <div class="body">
-      <div class="price">${l.price.toLocaleString()}<small>元/月</small></div>
+      <div class="price">${D.price(l)}</div>
       ${fee}
       <a class="ttl" href="${l.url}" target="_blank" rel="noopener">${escapeHtml(l.title)}</a>
       <div class="meta">
-        <span>${l.district}</span><span>${l.kind}</span>
-        <span>${l.layout || '—'}</span><span>${l.area} 坪</span><span>${l.floor}</span>
+        <span>${D.district(l)}</span><span>${D.kind(l)}</span>
+        <span>${l.layout || '—'}</span><span>${D.area(l)}</span><span>${D.floor(l)}</span>
       </div>
-      ${mrt}
-      <div class="meta" style="font-size:11.5px">${escapeHtml(l.address)}　·　${escapeHtml(l.role)}</div>
+      <div class="mrt"${l.station ? '' : ' style="color:var(--muted)"'}>${D.mrt(l)}</div>
+      <div class="meta" style="font-size:11.5px">${escapeHtml(D.where(l))}${l.role ? '　·　' + escapeHtml(l.role) : ''}</div>
       <div class="tagrow">${l.tags.slice(0,5).map((t)=>`<span class="tg">${escapeHtml(t)}</span>`).join('')}</div>
     </div>`;
 
@@ -541,6 +581,19 @@ function card(l) {
   };
   return el;
 }
+// 顯示用：FB 貼文抽不到的欄位顯示「未標」，不要印出 null
+const D = {
+  price:    (l) => l.price == null ? '<span class="unk">未標價</span>' : l.price.toLocaleString() + '<small>元/月</small>',
+  district: (l) => l.district || (l.outsideTaipei ? '台北市外' : '未標區'),
+  kind:     (l) => l.kind || '未標類型',
+  area:     (l) => l.area ? l.area + ' 坪' : '未標坪數',
+  floor:    (l) => l.floor || '',
+  srcName:  (l) => l.source === 'fb' ? 'Facebook' : '591',
+  where:    (l) => l.source === 'fb' ? (l.group || 'FB 社團') : l.address,
+  mrt:      (l) => l.station
+    ? `🚇 ${l.station}　${l.stationDist == null ? '' : (l.stationDistApprox ? '約' : '') + l.stationDist + ' 公尺'}　${(l.lines || []).join('／')}`
+    : (l.source === 'fb' ? '未標捷運' : '非捷運周邊'),
+};
 const escapeHtml = (s) => String(s ?? '').replace(/[&<>"']/g,
   (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
@@ -636,9 +689,11 @@ window.addEventListener('popstate', (e) => {
   if (st.swipe) { if (!SW.open) swShow(); } else if (SW.open) swHide();
   const l = st.detail && BY_ID.get(st.detail);
   l ? showDetail(l) : hideDetail();
+  st.imp ? showImport() : hideImport();
 });
 document.addEventListener('keydown', (e) => {
   if (e.target.matches('input, select, textarea')) return;
+  if (document.querySelector('.imp')) { if (e.key === 'Escape') closeImport(); return; }
   if (document.querySelector('.ov')) {          // 面板在最上層
     if (e.key === 'Escape') closeDetail();
     if (e.key === 'ArrowRight') gal(1);
@@ -670,28 +725,29 @@ function gal(d) {
 
 function detailHtml(l) {
   const inc = (l.contains || []).map((c) => CONTAIN_LABEL[c] || c);
-  const total = l.price + (l.extraFee || 0);
+  const total = l.price == null ? null : l.price + (l.extraFee || 0);
   const sum = l.extraFee > 0
-    ? `<div class="dsum fee">＋額外費用 ${l.extraFee.toLocaleString()} 元/月　→　每月合計約 <b>${total.toLocaleString()}</b> 元</div>`
+    ? `<div class="dsum fee">＋額外費用 ${l.extraFee.toLocaleString()} 元/月${total != null ? `　→　每月合計約 <b>${total.toLocaleString()}</b> 元` : ''}</div>`
+    : l.feeIncluded ? `<div class="dsum fee inc">含管理費</div>`
     : inc.length ? `<div class="dsum fee inc">租金已含 ${inc.join('、')}</div>`
                  : `<div class="dsum fee none">未註明額外費用</div>`;
 
   const facts = [
     ['房型', l.layout || '—'], ['坪數', l.area ? l.area + ' 坪' : '—'],
     ['樓層', l.floor || '—'], ['類型', l.kind || '—'],
-    ['每坪租金', l.area ? Math.round(l.price / l.area).toLocaleString() + ' 元' : '—'],
+    ['每坪租金', l.area && l.price != null ? Math.round(l.price / l.area).toLocaleString() + ' 元' : '—'],
     ['裝潢', l.fitment || '—'],
-    ['捷運', l.station ? `${l.station} ${l.stationDist ?? '?'} 公尺` : '非捷運周邊'],
-    ['路線', l.lines.length ? l.lines.join('／') : '—'],
-    ['行政區', l.district || '—'], ['出租方', l.role || '—'],
-    ['社區', l.community || '—'],
+    ['捷運', l.station ? `${l.station} ${l.stationDist == null ? '' : (l.stationDistApprox ? '約 ' : '') + l.stationDist + ' 公尺'}` : (l.source === 'fb' ? '未標' : '非捷運周邊')],
+    ['路線', (l.lines || []).length ? l.lines.join('／') : '—'],
+    ['行政區', D.district(l)], ['出租方', l.role || (l.source === 'fb' ? '見貼文' : '—')],
+    ['來源', l.source === 'fb' ? `FB · ${l.group || ''}` : '591'],
     ['首次出現', new Date(l.firstSeen).toLocaleDateString('zh-TW', {month:'numeric', day:'numeric'})],
   ];
 
   return `<div class="dlg" role="dialog" aria-modal="true">
     <button class="x" data-x title="關閉（Esc 或上一頁）">✕</button>
     <div class="gal">
-      <img src="${galPhotos[0] || ''}" alt="">
+      ${galPhotos[0] ? `<img src="${galPhotos[0]}" alt="">` : `<div style="aspect-ratio:4/3;display:grid;place-items:center;color:#888;font-size:13px">${l.source === 'fb' ? `圖片 ${l.imageCount || 0} 張，在 Facebook 原文查看` : '無圖片'}</div>`}
       ${galPhotos.length > 1 ? `<button class="nav prev" data-g="-1">‹</button>
         <button class="nav next" data-g="1">›</button>
         <span class="idx">1 / ${galPhotos.length}</span>` : ''}
@@ -699,19 +755,20 @@ function detailHtml(l) {
     ${galPhotos.length > 1 ? `<div class="strip">${galPhotos.map((p, i) =>
       `<img src="${p}" data-t="${i}" class="${i === 0 ? 'on' : ''}" loading="lazy" alt="">`).join('')}</div>` : ''}
     <div class="dbody">
-      <div class="dprice">${l.price.toLocaleString()}<small>元/月</small></div>
+      <div class="dprice">${D.price(l)}</div>
       ${sum}
       <h2 class="dttl">${escapeHtml(l.title)}</h2>
-      <div class="meta" style="font-size:12.5px">${escapeHtml(l.address)}</div>
+      <div class="meta" style="font-size:12.5px">${escapeHtml(D.where(l))}</div>
+      ${l.source === 'fb' ? `<div class="raw">${escapeHtml(l.raw || '')}</div>` : ''}
       <div class="facts">${facts.map(([k, v]) =>
         `<div class="fact"><div class="k">${k}</div><div class="v">${escapeHtml(v)}</div></div>`).join('')}</div>
       <div class="dtags">${l.tags.map((t) => `<span class="tg">${escapeHtml(t)}</span>`).join('')}</div>
       <div class="dacts">
         <button data-act="save" class="${LS.saved.has(l.id) ? 'on' : ''}">${LS.saved.has(l.id) ? '★ 已收藏' : '☆ 收藏'}</button>
         <button data-act="hide">${LS.hidden.has(l.id) ? '↺ 取消排除' : '✕ 排除這筆'}</button>
-        <a class="go" href="${l.url}" target="_blank" rel="noopener">在 591 開啟 ↗</a>
+        <a class="go" href="${l.url}" target="_blank" rel="noopener">在 ${D.srcName(l)} 開啟 ↗</a>
       </div>
-      <div class="hint">屋況說明、格局圖和聯絡方式要到 591 才看得到　·　按上一頁或 Esc 回看板</div>
+      <div class="hint">${l.source === 'fb' ? '照片和聯絡方式在 Facebook 原文' : '屋況說明、格局圖和聯絡方式要到 591 才看得到'}　·　按上一頁或 Esc 回看板</div>
     </div>
   </div>`;
 }
@@ -737,6 +794,39 @@ function wireDetail(ov, l) {
     render(true);
   };
 }
+
+/* ---------- 匯入 FB 貼文（貼上 tools/fb-extract.js 的輸出）---------- */
+const FB_LS = 'rent591.fbImport';
+function fbLocal() { try { return JSON.parse(localStorage.getItem(FB_LS) || 'null'); } catch { return null; } }
+function openImport() { history.pushState({ imp: 1 }, '', '#import'); showImport(); }
+function showImport() {
+  if (document.querySelector('.imp')) return;
+  const ov = document.createElement('div'); ov.className = 'ov imp';
+  ov.addEventListener('click', (e) => { if (e.target === ov) closeImport(); });
+  ov.innerHTML = `<div class="dlg" style="max-width:640px"><button class="x" data-x>✕</button>
+    <div class="dbody">
+      <h2 class="dttl">匯入 FB 貼文</h2>
+      <div class="meta" style="margin-bottom:10px">在已登入的社團頁執行 <code>tools/fb-extract.js</code>，JSON 會複製到剪貼簿，貼到下面。存在這個瀏覽器裡；要跨裝置請改用 <code>node tools/fb-import.mjs</code> 提交 fb.json。</div>
+      <textarea placeholder='{"group":{...},"capturedAt":"...","posts":[...]}'></textarea>
+      <div class="msg"></div>
+      <div class="dacts"><button class="go" data-go>匯入</button><button data-clear-fb>清除本機匯入（${(fbLocal()?.listings || []).length} 筆）</button></div>
+    </div></div>`;
+  document.body.append(ov); document.body.style.overflow = 'hidden';
+  ov.querySelector('[data-x]').onclick = closeImport;
+  const msg = ov.querySelector('.msg');
+  ov.querySelector('[data-go]').onclick = async () => {
+    let raw; try { raw = JSON.parse(ov.querySelector('textarea').value); } catch { msg.className = 'msg err'; msg.textContent = '不是合法的 JSON'; return; }
+    if (!raw || !raw.group || !Array.isArray(raw.posts)) { msg.className = 'msg err'; msg.textContent = '格式不對：要有 group 和 posts'; return; }
+    const { mergeFb } = await import('./fb-listing.mjs');
+    const r = mergeFb(fbLocal(), raw, DATA.mrtLines);
+    localStorage.setItem(FB_LS, JSON.stringify(r.store));
+    msg.className = 'msg'; msg.textContent = `匯入完成：新增 ${r.added}、更新 ${r.updated}`;
+    rebuildListings(); render();
+  };
+  ov.querySelector('[data-clear-fb]').onclick = () => { localStorage.removeItem(FB_LS); rebuildListings(); render(); closeImport(); };
+}
+function closeImport() { if (history.state && history.state.imp) history.back(); else hideImport(); }
+function hideImport() { document.querySelector('.imp')?.remove(); document.body.style.overflow = SW.open ? 'hidden' : ''; }
 
 /* ---------- 篩選抽屜 ---------- */
 function openFilters()  { $('#filters').classList.add('open'); }
@@ -810,19 +900,19 @@ function swCard(l, pos) {
   const ph = swPhotos(l);
   const idx = pos === 'front' ? Math.min(SW.photo, ph.length - 1) : 0;
   const inc = (l.contains || []).map((c) => CONTAIN_LABEL[c] || c);
-  const feeLine = l.extraFee > 0 ? `＋額外費用 ${l.extraFee.toLocaleString()}／月（合計約 ${(l.price + l.extraFee).toLocaleString()}）`
-                : inc.length ? `租金含 ${inc.join('、')}` : '';
+  const feeLine = l.extraFee > 0 ? `＋額外費用 ${l.extraFee.toLocaleString()}／月${l.price != null ? `（合計約 ${(l.price + l.extraFee).toLocaleString()}）` : ''}`
+                : l.feeIncluded ? '含管理費' : inc.length ? `租金含 ${inc.join('、')}` : '';
   return `<div class="sc ${pos}" data-id="${l.id}">
-    <img src="${ph[idx] || ''}" alt="" draggable="false">
+    ${ph.length ? `<img src="${ph[idx]}" alt="" draggable="false">` : `<div style="position:absolute;inset:0;display:grid;place-items:center;color:#888">${l.source === 'fb' ? `圖片 ${l.imageCount || 0} 張，在 Facebook 原文` : '無圖片'}</div>`}
     <div class="dots">${ph.map((_, i) => `<i class="${i === idx ? 'on' : ''}"></i>`).join('')}</div>
-    ${isNew(l) ? '<span class="nb">新上架</span>' : ''}
+    ${isNew(l) ? '<span class="nb">新上架</span>' : ''}${l.source === 'fb' ? '<span class="nb" style="background:#1877f2;left:auto;right:12px">FB</span>' : ''}
     <div class="stamp like">收藏</div><div class="stamp nope">跳過</div>
     <div class="info">
-      <div class="p">${l.price.toLocaleString()}<small>元/月</small></div>
+      <div class="p">${D.price(l)}</div>
       ${feeLine ? `<div class="f">${feeLine}</div>` : ''}
       <div class="tt">${escapeHtml(l.title)}</div>
-      <div class="m">${l.district}　${l.kind}　${l.layout || ''}　${l.area} 坪　${l.floor}</div>
-      <div class="m">${l.station ? `🚇 ${l.station} ${l.stationDist ?? '?'}m　${l.lines.join('／')}` : '非捷運周邊'}</div>
+      <div class="m">${D.district(l)}　${D.kind(l)}　${l.layout || ''}　${D.area(l)}　${D.floor(l)}</div>
+      <div class="m">${D.mrt(l)}</div>
     </div>
     <button class="det" data-det>詳細 ›</button>
   </div>`;
@@ -895,6 +985,7 @@ function bind() {
   $('#mSwipe').onclick = swOpen;
   $('#mFilt').onclick = openFilters;
   $('#filtDone').onclick = closeFilters;
+  $('#impOpen').onclick = openImport;
   $('#dist').oninput = (e) => { F.dist = +e.target.value; render(); };
   for (const [id, key] of [['#pMin','pMin'],['#pMax','pMax'],['#aMin','aMin'],['#aMax','aMax']]) {
     $(id).oninput = (e) => { F[key] = e.target.value === '' ? null : +e.target.value; render(); };
@@ -906,20 +997,37 @@ function bind() {
     b.onclick = () => { F[b.dataset.clear].clear(); if (b.dataset.clear === 'lines') F.stations.clear(); render(); });
   $('#resetAll').onclick = () => {
     Object.assign(F, {lines:new Set(),stations:new Set(),districts:new Set(),layouts:new Set(),
-      kinds:new Set(),tags:new Set(),contains:new Set(),role:'all',fee:'all',basis:'rent',dist:2000,
-      pMin:null,pMax:null,aMin:null,aMax:null});
+      kinds:new Set(),tags:new Set(),contains:new Set(),sources:new Set(),role:'all',fee:'all',basis:'rent',dist:2000,
+      hideUnknown:false,showSeeking:false,pMin:null,pMax:null,aMin:null,aMax:null});
     render();
   };
 }
 
 /* ---------- 啟動 ---------- */
 let DISTRICTS = [], DISTRICT_COUNT = {}, STATION_COUNT = {}, TAG_COUNT = {},
-    CONTAIN_COUNT = {}, KINDS = [];
+    CONTAIN_COUNT = {}, SRC_COUNT = {}, KINDS = [];
+let BASE = null, FB = null;   // 591 抓取結果；提交的 fb.json
+
+// 591 + fb.json + 本機匯入 → DATA.listings。本機匯入的同 id 以較新 capturedAt 為準。
+function rebuildListings() {
+  const fb = new Map((FB?.listings || []).map((l) => [l.id, l]));
+  for (const l of fbLocal()?.listings || []) { const p = fb.get(l.id); if (!p || l.capturedAt >= p.capturedAt) fb.set(l.id, l); }
+  DATA.listings = [...BASE.listings, ...fb.values()];
+  DATA.fbCount = fb.size;
+  SRC_COUNT = { '591': BASE.listings.filter((l) => !l.gone).length, fb: fb.size };
+  BY_ID = new Map(DATA.listings.map((l) => [l.id, l]));
+}
 (async function init() {
   try {
-    const res = await fetch('data.json?t=' + Date.now());
+    const [res, fbRes] = await Promise.all([
+      fetch('data.json?t=' + Date.now()),
+      fetch('fb.json?t=' + Date.now()).catch(() => null),
+    ]);
     if (!res.ok) throw new Error('HTTP ' + res.status);
-    DATA = await res.json();
+    BASE = await res.json();
+    FB = fbRes && fbRes.ok ? await fbRes.json().catch(() => null) : null;   // 沒有 fb.json 也沒關係
+    DATA = { ...BASE };
+    rebuildListings();
   } catch (e) {
     $('#out').innerHTML = `<div class="err">讀不到 data.json：${escapeHtml(e.message)}<br>
       <small>如果是剛建好的 repo，請等 GitHub Actions 第一次跑完（或到 Actions 頁手動觸發一次）。</small></div>`;
@@ -942,14 +1050,15 @@ let DISTRICTS = [], DISTRICT_COUNT = {}, STATION_COUNT = {}, TAG_COUNT = {},
 
   const dt = new Date(DATA.updatedAt);
   $('#stamp').innerHTML = `資料更新於 <b>${dt.toLocaleString('zh-TW',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'})}</b>` +
-    `　·　共 ${DATA.count.toLocaleString()} 筆　·　資料來源 591`;
-  BY_ID = new Map(DATA.listings.map((l) => [l.id, l]));
+    `　·　591 共 ${DATA.count.toLocaleString()} 筆` +
+    (DATA.fbCount ? `　·　FB ${DATA.fbCount} 筆${FB?.importedAt ? `（匯入於 ${new Date(FB.importedAt).toLocaleDateString('zh-TW',{month:'numeric',day:'numeric'})}）` : ''}` : '');
   bind();
   render();
   // 網址帶 #p<id> 時直接開該筆（分享連結、重新整理都能回到原本看的物件）
   const m = location.hash.match(/^#p(\d+)$/);
   if (m && BY_ID.has(+m[1])) { history.replaceState({ detail: +m[1] }, '', location.hash); showDetail(BY_ID.get(+m[1])); }
   else if (location.hash === '#swipe') { history.replaceState({ swipe: 1 }, '', '#swipe'); swShow(); }
+  else if (location.hash === '#import') { history.replaceState({ imp: 1 }, '', '#import'); showImport(); }
 })();
 </script>
 </body>

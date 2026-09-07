@@ -4,6 +4,8 @@ on:
   schedule:
     - cron: '*/30 * * * *'   # 每 30 分鐘（GitHub 排程為盡力而為，尖峰時可能延後幾分鐘）
   workflow_dispatch:          # 也可以到 Actions 頁面手動觸發
+  push:                       # 提交 site/fb.json 或改網頁時立即重新部署
+    paths: ['site/**', 'core/**']
 
 permissions:
   contents: read
@@ -46,6 +48,9 @@ jobs:
         with:
           path: site/data.json
           key: rent-data-${{ github.run_id }}
+
+      - name: 把網頁會 import 的 core 模組複製到 site/
+        run: cp core/text-extract.mjs core/fb-listing.mjs site/
 
       - uses: actions/configure-pages@v5
 

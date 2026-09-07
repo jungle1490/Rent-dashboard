@@ -7,3 +7,7 @@ site/data.json
 
 # 本機設定，不進版控
 .claude/settings.local.json
+
+# 由 core/ 複製給網頁用，部署時 workflow 會複製
+site/text-extract.mjs
+site/fb-listing.mjs
