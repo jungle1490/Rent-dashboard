@@ -14,3 +14,4 @@
 - **未標欄位篩選預設放行，另給「隱藏未標」開關**：使用者要「找不出來的就放連結自己看」；排除會讓 FB 房源幾乎全消失。
 - **網頁動態 import core 模組（複製到 site/）而非重複實作**：抽取規則只維護一份；代價是本機開發多一步 cp。
 - **引進 agent framework 時網頁資產 docs/ → site/**：框架佔用 docs/，Pages 用 artifact 部署不依賴 docs/ 慣例。
+- **抓取移到 Mac、GitHub 只發布**（ADR-0003）：591 擋 Actions IP；孤兒分支 force push 讓 repo 不成長；資料新鮮度＝Mac 最後一次執行，使用者接受每日一次。

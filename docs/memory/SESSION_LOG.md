@@ -11,5 +11,7 @@
 - Blocked: 推送曾卡 GitHub 憑證（使用者 `gh auth login` 後解除）；FB 圖片網址無法經擴充功能取回。
 - Fix（使用者回報「篩選面板關不掉」）：重現於 390×844——`aside.open` 高度長到 1241px 不捲動、完成鈕在畫面外；且抽屜沒走 history、返回會離站。
   修 `height:100%` + 抽屜 pushState／back + 頂部 ✕；驗收腳本改查元素在視窗內；`test/browser/{drawer,swipe,fb}.js` 入庫；playbooks/ui.md。[VERIFIED 12 項斷言]
-- Next: 使用者設 Pages Source = GitHub Actions 並手動跑第一次，確認 https://jungle1490.github.io/Rent-dashboard/ 可開（目前 404 = 未設定）。
+- ADR-0003：591 對 Actions 回 CloudFront 403 [VERIFIED 診斷 workflow]，抓取改 Mac launchd 每日 + 孤兒分支 data + Actions 只發布；T-009 程式完成、data 分支已推、launchd 已裝。
+- 發布 workflow startup_failure：三輪切分（14 個變體）證明任何 `uses:` 都失敗、純 run 成功；`gh api …/actions/permissions` = `local_only` [VERIFIED]。待使用者同意改回 `all`。
+- Next: 使用者同意後改 Actions 權限 + Pages Source，跑一次發布，確認網址。
 

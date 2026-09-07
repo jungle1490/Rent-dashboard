@@ -5,22 +5,26 @@ _Last rewritten: 2026-09-08 by Claude Fable 5.1（session-end）._
 ## What exists and works（VERIFIED，除非另註）
 
 - **591 抓取** `scrape.mjs`：解析清單頁 `window.__NUXT__`（vm 沙箱）、零依賴。2 個 query 約 135 頁／5 分鐘，約 3,900 筆。
+  **只能在台灣 IP 跑**：GitHub Actions 打 591 回 CloudFront 403（ADR-0003）→ 改由 Mac launchd 每日執行 `tools/run-local.sh`，`tools/publish.sh` force push 孤兒分支 `data`，Actions 只發布。
   正規化行政區／站名／站→線／租金包含項目；跨輪比對新上架、降價、已下架（保留 7 天）；0 筆或 <50% 中止不覆蓋。
 - **看板** `site/index.html`：多線＋站複選、多區、租金區間（可比總額）、租金已含、坪數／房型／類型／出租方／標籤、離站距離、排序；
   收藏／排除／已看（localStorage `rent591.*`）；分批渲染；詳細面板（相簿、pushState）；滑卡模式（T-001）；手機版（T-002）。
 - **FB 社團房源**（ADR-0002）：`tools/fb-extract.js` 在使用者登入的社團頁跑 → `tools/fb-import.mjs` 或看板「匯入 FB 貼文」→ `site/fb.json`／localStorage。
   `core/text-extract.mjs` 抽價格／管理費／區／站／距離／房型／坪數／樓層，`node --test` 10/10。看板對未標欄位預設放行。
   實際從群組 459966811445588 抽 2 篇並匯入（fb.json 已提交）。
-- **部署**：`https://github.com/jungle1490/Rent-dashboard` main = `7d9437e`。`scrape.yml` 每 30 分鐘 + push(site/**, core/**) 觸發，
-  Actions cache 帶上一輪，artifact 部署 Pages；`keepalive.yml` 每週 commit 防 60 天停用。網址 https://jungle1490.github.io/Rent-dashboard/
+- **部署**：`scrape.yml`（名稱「發布看板」）push 到 main／data 就把 data 分支檔案疊上 site/ 部署 Pages。keepalive／cron／cache 已移除。網址 https://jungle1490.github.io/Rent-dashboard/
 
 ## In progress
 
-- **T-003 剩使用者操作**：Settings → Pages → Source = GitHub Actions；Actions 手動跑第一次。未做前網址打不開。
+- **T-009（ADR-0003）程式已完成、`data` 分支已推（`d78f04f`，5.5MB data.json + fb.json）、launchd 已安裝（每天 08:00）。**
+- **卡在兩個 repo 設定（需使用者同意／操作）**：
+  1. Actions 權限是 `allowed_actions: local_only`（VERIFIED via `gh api …/actions/permissions`）→ 任何 `uses:` 都 startup_failure。要改回 `all`。
+  2. Pages Source 尚未設為 GitHub Actions（網址 404）。
+- 兩者未解前，發布 workflow 無法跑，網址打不開。
 
 ## Next (ordered)
 
-1. 使用者完成 Pages 設定並跑第一次 workflow；確認網址可開、FB 兩筆有出現。
+1. 使用者同意後：`gh api -X PUT …/actions/permissions -f allowed_actions=all`、Pages Source = GitHub Actions；`gh workflow run scrape.yml`；確認網址可開。
 2. 使用者在登入 Chrome 對兩個社團跑 `tools/fb-extract.js`（459966811445588、305665579858865），貼進看板或交 agent 匯入。
 3. T-008 抽取補強：地標→行政區（天母→士林區）、插字步行距離、多房價取區間。
 4. T-004 抽出 `scrape.mjs` 的 core 純函式到 `core/` 並補測試（text-extract／fb-listing 已在 core/）。
@@ -34,5 +38,7 @@ _Last rewritten: 2026-09-08 by Claude Fable 5.1（session-end）._
 - **本機開發要先 `cp core/*.mjs site/`**（網頁動態 import；這兩個複本已 gitignore，workflow 會複製）。
 - agent 透過 Chrome 擴充功能代跑 FB 抽取**拿不到圖片網址**（簽章 query string 被擋）；使用者自己跑書籤小工具才有圖。
 - FB 動態載入極慢，8 次捲動只出 3 篇；第二個社團頁面曾讓 JS 執行逾時 45 秒。
+- **所有 `uses:` 都 startup_failure 且 API 不給原因時，先查 `gh api repos/…/actions/permissions`**（playbooks/ci.md）。
+- `run-local.sh` 用 nvm 的 node（launchd PATH 很短，腳本自己找）。
 - 「新上架」徽章要等資料累積 36 小時才有意義（首輪全是新的，UI 自動關閉）。
 - `scrape.mjs` 的 core 區段與 `mrt-lines.json` 是 FROZEN（CLAUDE.md）。
