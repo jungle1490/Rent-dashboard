@@ -15,7 +15,7 @@
 
 ```bash
 node --check scrape.mjs                                        # typecheck — must pass before "done"
-node --test                                                    # full test suite（core/text-extract 等；scrape 本體待 T-004）
+node --test test/*.test.mjs                                    # full test suite（core；test/browser/*.js 是瀏覽器內腳本，不在此跑）
 cp core/*.mjs site/ && node scrape.mjs && python3 -m http.server 8899 --directory site   # run locally → http://localhost:8899
 ```
 

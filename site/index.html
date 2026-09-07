@@ -578,6 +578,7 @@ function card(l) {
       </div>
       <div class="mrt"${l.station ? '' : ' style="color:var(--muted)"'}>${D.mrt(l)}</div>
       <div class="meta" style="font-size:11.5px">${escapeHtml(D.where(l))}${l.role ? '　·　' + escapeHtml(l.role) : ''}</div>
+      <div class="meta" style="font-size:11px">🕒 ${D.when(l)}</div>
       <div class="tagrow">${l.tags.slice(0,5).map((t)=>`<span class="tg">${escapeHtml(t)}</span>`).join('')}</div>
     </div>`;
 
@@ -605,6 +606,11 @@ const D = {
   area:     (l) => l.area ? l.area + ' 坪' : '未標坪數',
   floor:    (l) => l.floor || '',
   srcName:  (l) => l.source === 'fb' ? 'Facebook' : '591',
+  when:     (l) => {
+    const d = (iso) => iso ? new Date(iso).toLocaleDateString('zh-TW', { month: 'numeric', day: 'numeric' }) : '';
+    if (l.source === 'fb') return (l.postedAt ? `發文 ${d(l.postedAt)}` : `抓取 ${d(l.capturedAt)}`) + `　首次出現 ${d(l.firstSeen)}`;
+    return (l.refreshTime ? `${l.refreshTime}` : '') + `　首次出現 ${d(l.firstSeen)}`;
+  },
   where:    (l) => l.source === 'fb' ? (l.group || 'FB 社團') : l.address,
   mrt:      (l) => l.station
     ? `🚇 ${l.station}　${l.stationDist == null ? '' : (l.stationDistApprox ? '約' : '') + l.stationDist + ' 公尺'}　${(l.lines || []).join('／')}`
@@ -758,6 +764,7 @@ function detailHtml(l) {
     ['路線', (l.lines || []).length ? l.lines.join('／') : '—'],
     ['行政區', D.district(l)], ['出租方', l.role || (l.source === 'fb' ? '見貼文' : '—')],
     ['來源', l.source === 'fb' ? `FB · ${l.group || ''}` : '591'],
+    ['時間', D.when(l)],
     ['首次出現', new Date(l.firstSeen).toLocaleDateString('zh-TW', {month:'numeric', day:'numeric'})],
   ];
 
@@ -936,6 +943,7 @@ function swCard(l, pos) {
       <div class="tt">${escapeHtml(l.title)}</div>
       <div class="m">${D.district(l)}　${D.kind(l)}　${l.layout || ''}　${D.area(l)}　${D.floor(l)}</div>
       <div class="m">${D.mrt(l)}</div>
+      <div class="m">🕒 ${D.when(l)}</div>
     </div>
     <button class="det" data-det>詳細 ›</button>
   </div>`;

@@ -35,7 +35,10 @@
     const images = [...box.querySelectorAll('img[src*="scontent"]')]
       .filter((i) => (i.naturalWidth || i.width) > 150).map((i) => i.src);
     const id = (link.match(/\/(?:posts|permalink)\/(\d+)/) || [])[1] || link;
-    posts.set(link, { id, link, text, images: [...new Set(images)].slice(0, 8) });
+    // 發文時間：時間文字被 FB 打散，但永久連結的 aria-label 是完整日期「2026年9月7日 星期一上午11:24」
+    const postedText = [...box.querySelectorAll('a[aria-label]')].map((x) => x.getAttribute('aria-label'))
+      .find((t) => /\d{4}年\d{1,2}月\d{1,2}日/.test(t || '')) || '';
+    posts.set(link, { id, link, text, postedText, images: [...new Set(images)].slice(0, 8) });
   }
 
   const out = { group: { id: gid, name: groupName, url: `https://www.facebook.com/groups/${gid}/` },

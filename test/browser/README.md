@@ -1,5 +1,7 @@
 # 瀏覽器驗收腳本
 
+（`node --test` 請用 `node --test test/*.test.mjs`，這個目錄的 .js 不是 node 測試。）
+
 前端邏輯內嵌在 `site/index.html`，沒有單元測試框架（零依賴政策；抽離成模組是 T-004）。
 這裡的腳本是**在瀏覽器 Console（或 agent 的 javascript 工具）貼上執行**的斷言，回傳物件裡每個布林都要是 `true`。
 

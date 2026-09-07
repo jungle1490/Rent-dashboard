@@ -20,6 +20,7 @@ _Last rewritten: 2026-09-08 by Claude Fable 5.1（session-end）._
   使用者同意後以 gh api 把 Actions 權限改回 `all`、Pages Source 設為 workflow；發布 run 34150554393 success。
 - launchd `com.rent-dashboard.daily` 已安裝（每天 08:00 跑 `tools/run-local.sh`）。首次完整本機執行 VERIFIED：3,911 筆 → data 分支 → `publish.sh` 以 `gh workflow run` 觸發發布 → 線上更新（推孤兒分支本身不會觸發 workflow）。
 - 看板有「↻ 更新資料」鈕：重新讀已發布的 data.json／fb.json，有變才重畫；切回分頁超過 5 分鐘自動檢查。它**不能**直接抓 591（VERIFIED 591 無 CORS header）。
+- 房源卡片／面板／滑卡顯示時間：591 用 `refreshTime`（X 小時內更新）＋首次出現；FB 用 `postedAt`（永久連結 aria-label 的完整日期，VERIFIED）＋首次出現。FB 匯入只留最近 30 天（`core/fb-listing.mjs` KEEP_DAYS）。
 - T-010（FB 每日自動抽取）未開始。
 
 ## Next (ordered)
