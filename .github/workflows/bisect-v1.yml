@@ -1,0 +1,32 @@
+name: bisect-v1-full
+on:
+  push:
+    branches:
+      - main
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+concurrency:
+  group: bisect1
+  cancel-in-progress: true
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - name: 取 data 分支的抓取結果
+        run: |
+          if git fetch --depth=1 origin data 2>/dev/null; then
+            echo "data.json $(git show origin/data:data.json | wc -c)"
+          else
+            echo "::warning::還沒有 data 分支"
+          fi
+      - id: deploy
+        run: echo "page_url=x" >> "$GITHUB_OUTPUT"
