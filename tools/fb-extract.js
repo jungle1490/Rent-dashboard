@@ -1,4 +1,6 @@
 // 在「已登入」的 Facebook 社團頁面執行（DevTools Console 貼上，或做成書籤小工具）。
+// 用自動化工具代跑時：window.__fbPost／__fbKnown／__fbMinPosts 的設定要跟這支腳本放在「同一次」執行，
+// 每次 javascript 執行是獨立環境，分開設就會遺失。
 // 建議網址：
 //   搜尋頁  https://www.facebook.com/groups/<id>/search/?q=出租   （腳本會自動打開「最新」開關，依發文時間排序）
 //   動態牆  https://www.facebook.com/groups/<id>/?sorting_setting=CHRONOLOGICAL   （新貼文優先）
