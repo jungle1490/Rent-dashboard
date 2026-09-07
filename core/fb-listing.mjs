@@ -28,7 +28,7 @@ export function postToListing(post, group, capturedAt, mrtLines, prev) {
     station: x.station, stationDist: x.stationDist, stationDistApprox: x.stationDistApprox,
     lines: x.station ? Object.entries(mrtLines).filter(([, ss]) => ss.includes(x.station)).map(([l]) => l) : [],
     layout: x.layout, kind: x.kind, area: x.area, floor: x.floor,
-    isSeeking: x.isSeeking, tags: [], contains: [], address: '', role: '',
+    isSeeking: x.isSeeking, isSale: x.isSale, tags: [], contains: [], address: '', role: '',
     postedAt: parseFbDate(post.postedText) || prev?.postedAt || null,
     capturedAt, firstSeen: prev?.firstSeen || capturedAt, lastSeen: capturedAt, gone: false,
   };

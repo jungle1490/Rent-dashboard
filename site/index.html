@@ -248,7 +248,7 @@ aside.open .done{display:block;position:sticky;bottom:0;width:100%;padding:13px;
       <div class="chips" id="srcChips"></div>
       <div class="chips" style="margin-top:6px">
         <button class="chip sub" id="hideUnk">隱藏未標欄位的物件</button>
-        <button class="chip sub" id="showSeek">顯示求租貼文</button>
+        <button class="chip sub" id="showSeek">顯示求租／售屋貼文</button>
       </div>
     </div>
 
@@ -400,7 +400,7 @@ const isNew = (l) => NEW_MEANINGFUL && !l.gone &&
 const unk = (l, v) => l.source === 'fb' && (v == null || v === '');
 function matches(l) {
   if (F.sources.size && !F.sources.has(l.source || '591')) return false;
-  if (l.isSeeking && !F.showSeeking) return false;
+  if ((l.isSeeking || l.isSale) && !F.showSeeking) return false;
   if (F.hideUnknown && l.source === 'fb' && (l.price == null || !l.district)) return false;
   if (F.lines.size) {
     if (unk(l, l.station)) { /* 不知道站，放行 */ }
@@ -548,6 +548,7 @@ function card(l) {
   else if (isNew(l)) badges.push('<span class="badge new">新上架</span>');
   if (l.source === 'fb') badges.push('<span class="badge src">FB</span>');
   if (l.isSeeking) badges.push('<span class="badge seek">求租</span>');
+  if (l.isSale) badges.push('<span class="badge seek">售屋</span>');
   if (LS.seen.has(l.id)) badges.push('<span class="badge seen">已看</span>');
   if (l.prevPrice && l.prevPrice > l.price)
     badges.push(`<span class="badge drop">↓ ${(l.prevPrice - l.price).toLocaleString()}</span>`);

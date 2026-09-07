@@ -137,11 +137,17 @@ function findFloor(t) {
 /** 主入口：貼文本文 → 欄位。`mrtLines` 是 mrt-lines.json 的物件。 */
 export function extractListing(text, mrtLines) {
   const t = normalizeText(text);
-  const isSeeking = /#\s*求租|求租|徵室友|找室友|looking for (?:a )?(?:room|apartment|flat|place)|seeking (?:a )?(?:room|apartment)/i.test(t);
+  // 求租（房客找房）vs 出租：中文有強訊號就算；英文要「找房訊號」且沒有出租訊號，
+  // 因為房東文常寫 "Looking for a hassle-free…"。「找室友／徵室友」是房東在找人，不算求租。
+  const seekZh = /#\s*求租|求租|我要租房|想租(?!金|屋補|補)|預算|入住成員|預計入住|徵求?.{0,4}(?:房|住處)/.test(t);
+  const seekEn = /looking for (?:an? |a long.?term |long.?term )?(?:apartment|studio|room|flat|place|accommodation|rental)|will be staying in|just moved to taipei|exchange student|seeking (?:an? )?(?:apartment|room|flat)/i.test(t);
+  const offer = /出租|釋出|for rent|room available|available (?:from|now)|move-?in from|no agent fee|月租|租金[:：]|【案名|studio (?:suite|in|near)|immediate move/i.test(t);
+  const isSeeking = seekZh || (seekEn && !offer);
+  const isSale = /委託價|出售|售價|總價.{0,6}萬/.test(t) && !/出租/.test(t);
   const { district, outsideTaipei } = findDistrict(t);
   const { stationDist, approx } = findStationDist(t);
   return {
-    isSeeking,
+    isSeeking, isSale,
     price: findPrice(t),
     extraFee: findExtraFee(t),
     feeIncluded: /含管理費|管理費(?:已)?含|包含管理費|免管理費/.test(t),

@@ -85,7 +85,14 @@ test('房型／類型／坪數／樓層', () => {
 });
 test('求租貼文', () => {
   assert.equal(ex('#求租\n【租客】1人，政大女學生').isSeeking, true);
-  assert.equal(ex('徵室友 一起分租').isSeeking, true);
+  assert.equal(ex('徵室友 一起分租 房間釋出').isSeeking, false);   // 房東找室友＝出租
+  assert.equal(ex('【我要租房】預計入住時間：9/23 入住成員：2人＋2貓 預算 35000').isSeeking, true);
+  assert.equal(ex("Hello everyone! My partner and I are looking for an apartment in Taipei, budget 30k").isSeeking, true);
+  assert.equal(ex("I'm Nilsen, a French guy who just moved to Taipei looking for a room").isSeeking, true);
+  assert.equal(ex('Prime Location Studio in Daan, NO AGENT FEE. Looking for a hassle-free rental? 20000/month').isSeeking, false);
+  assert.equal(ex('Home 溫馨雅房釋出 #找女生室友 中山國中捷運站').isSeeking, false);
+  assert.equal(ex('案名：民生金碧園 委託價：3500萬 3房2廳').isSale, true);
+  assert.equal(ex('出租 套房 租金 15000').isSale, false);
   assert.equal(ex('出租 套房').isSeeking, false);
 });
 test('normalizeText 清掉反爬字元與全形', () => {
