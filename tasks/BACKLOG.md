@@ -17,8 +17,10 @@ Tier legend: **low** = any model · **mid** = capable coding model · **TOP** = 
       同時把前端純邏輯（`matches`、`swQueue`、undo 語意）抽成可 import 的模組補測試——T-001 目前只有瀏覽器內斷言
 - [ ] **T-005** ADR-0001 補完 alternatives 與 revisit trigger — low
 
-- [ ] **T-006** FB 社團貼文抽取：頁面內腳本 + `core/text-extract.mjs` + 測試 — mid/TOP（ADR-0002）
+- [x] **T-006** FB 社團貼文抽取：頁面內腳本 + `core/text-extract.mjs` + 測試 — mid/TOP（ADR-0002；2026-09-08 完成，`node --test` 10/10）
 - [ ] **T-007** FB 房源進看板：合併 fb.json、貼上匯入、來源標示、未標欄位處理 — mid
+
+- [ ] **T-008** 文字抽取補強：地標→行政區（天母→士林區、東區→大安區…）、插字的步行距離、多房價（「12000／14000／16000」取區間） — mid
 
 ## Later
 

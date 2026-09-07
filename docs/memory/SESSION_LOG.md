@@ -9,4 +9,6 @@
 - 執行 init-project：`docs/` 改為框架文件目錄，網頁資產移到 `site/`。
 - T-001 滑卡模式完成並驗收（實作細節見卡片）；已知限制：前端邏輯無單元測試，記入 T-004。
 - T-002 手機版完成並驗收。
-- T-003：合併遠端 initial commit、推送。
+- T-003：合併遠端 initial commit、推送成功（使用者登入 gh 後）。
+- 使用者要加 FB 社團房源：查證 Groups API 已停、未登入 400；在使用者 Chrome 登入狀態驗證 DOM 可抽本文／連結。寫 ADR-0002、T-006／T-007。
+- T-006 完成：core/text-extract.mjs + 10 個測試、fb-extract.js、fb-import.mjs，實抽 2 篇進 site/fb.json。

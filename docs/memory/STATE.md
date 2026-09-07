@@ -23,10 +23,13 @@ _Last rewritten: 2026-09-08 by init-project skill（專案已有可運作的程�
 - T-001 滑卡模式 **完成**（VERIFIED，27 項瀏覽器斷言全 true）：`rent591.seen`、佇列＝未看∩篩選∩未排除、左滑只標已看、右滑收藏、undo、pushState、篩選抽屜即時更新、看板「未看過」分頁與「已看」徽章。
 - T-002 手機版 **完成**（VERIFIED，375×667 與 1280×800 兩組斷言全 true）：≤900px 側欄收成抽屜、底部工具列（篩選／滑卡）、≤600px 單欄、無橫向捲動、滑卡不裁切、safe-area。
 - T-003 **已推送**（`1df2058`，遠端 SHA 一致，VERIFIED）。剩使用者在 GitHub 網頁：Settings → Pages → Source = GitHub Actions；Actions 手動跑第一次。網址 https://jungle1490.github.io/Rent-dashboard/
-- FB 社團房源（使用者堅持要）：VERIFIED 未登入 curl 回 HTTP 400 錯誤頁，雲端不可行。改走「使用者登入的瀏覽器」半自動路線，評估中。
+- FB 社團房源：ADR-0002 定案「只在登入瀏覽器內抽取」。T-006 **完成**（VERIFIED）：`tools/fb-extract.js`（頁面內）、`core/text-extract.mjs`（純函式，`node --test` 10/10 ——專案第一個有單元測試的模組）、`tools/fb-import.mjs` → `site/fb.json`。實際從群組 459966811445588 抽到 2 篇並匯入。
+- 限制（VERIFIED）：agent 透過 Chrome 擴充功能代跑拿不到圖片網址（簽章 query string 被擋）；FB 動態載入極慢，8 次捲動只出 3 篇；第二個社團（305665579858865「大台北租屋網🌞房東盡量PO」）結構相同但頁面執行逾時，未實抽。
+- T-007（FB 進看板 UI）尚未開始。
 
 ## Next (ordered)
 
-1. T-003 合併遠端 README、推送、設定 Pages Source = GitHub Actions、手動跑第一次。
-2. T-004 把 core 純函式抽成 `core/` 並用 `node --test` 補測試（站名解析、費用拆解、normalize）。
-3. 視需求：收藏／排除跨裝置同步（目前只在瀏覽器本機）。
+1. T-007 FB 房源進看板（合併 fb.json、貼上匯入、來源標示、未標欄位不排除、求租預設隱藏）。
+2. T-003 剩使用者：Pages Source = GitHub Actions、手動跑第一次。
+3. T-004 把 core 純函式抽成 `core/` 並用 `node --test` 補測試（站名解析、費用拆解、normalize）。
+4. 視需求：收藏／排除跨裝置同步（目前只在瀏覽器本機）。
