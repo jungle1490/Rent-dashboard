@@ -1,0 +1,15 @@
+name: bisect-v9-env
+on:
+  push:
+    branches:
+      - main
+permissions:
+  contents: read
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+    steps:
+
+      - run: echo hi
