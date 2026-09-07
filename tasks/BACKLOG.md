@@ -8,7 +8,7 @@ Tier legend: **low** = any model · **mid** = capable coding model · **TOP** = 
 - [x] **T-001** 滑卡模式 + 已看追蹤 — mid（2026-09-08 完成，卡片 tasks/T-001-swipe-mode.md）
       只限新上架＋未看過（可切換）、套用目前篩選、右滑收藏、左滑跳過（仍在「全部」可見）、返回上一張、
       點卡片切照片、「詳細」開面板；鍵盤 ←／→／Backspace；`rent591.seen`；看板加「未看過」分頁與「已看」徽章
-- [ ] **T-002** 手機版適配 — mid
+- [x] **T-002** 手機版適配 — mid（2026-09-08 完成，卡片 tasks/T-002-mobile.md）
       篩選收成全螢幕抽屜（有「完成」鈕）、底部工具列（篩選／滑卡）、卡片單欄、safe-area
 - [ ] **T-003** 推上 GitHub — low
       合併遠端 initial commit（README 以本地為準）、push、Settings → Pages → Source = GitHub Actions、手動跑第一次、確認網址

@@ -2,7 +2,7 @@
 <html lang="zh-TW">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>台北租屋看板</title>
 <style>
 :root{
@@ -23,7 +23,26 @@ a{color:inherit}
 
 /* ---- 版面 ---- */
 .wrap{display:grid;grid-template-columns:290px 1fr;gap:20px;max-width:1500px;margin:0 auto;padding:18px}
-@media(max-width:900px){ .wrap{grid-template-columns:1fr;padding:12px;gap:12px} }
+@media(max-width:900px){
+  .wrap{grid-template-columns:1fr;padding:12px;gap:12px;padding-bottom:84px}   /* 底部工具列的高度 */
+  header.top{padding-bottom:8px;gap:8px}
+  header.top h1{font-size:16px}
+  aside{display:none}              /* 手機：篩選收成抽屜，從底部工具列開 */
+  aside.open{display:block}
+  .swbtn{display:none}             /* 工具列裡有滑卡鈕 */
+  .bar select{font-size:12.5px}
+}
+@media(max-width:600px){ .cards{grid-template-columns:1fr} }
+
+/* ---- 手機底部工具列 ---- */
+.mbar{display:none}
+@media(max-width:900px){
+  .mbar{display:flex;position:fixed;left:0;right:0;bottom:0;z-index:40;gap:8px;
+    padding:10px 12px calc(10px + env(safe-area-inset-bottom));
+    background:var(--panel);border-top:1px solid var(--line)}
+  .mbar button{flex:1;padding:12px;border:1px solid var(--line);border-radius:10px;background:var(--bg);font-weight:600;font-size:14px}
+  .mbar button.pri{background:var(--accent);border-color:var(--accent);color:#fff}
+}
 
 header.top{grid-column:1/-1;display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;
   padding-bottom:12px;border-bottom:1px solid var(--line)}
@@ -122,7 +141,7 @@ aside.open .done{display:block;position:sticky;bottom:0;width:100%;padding:13px;
 .sw .hd button{padding:6px 10px;border:1px solid var(--line);border-radius:8px;background:transparent;font-size:12.5px;white-space:nowrap}
 .sw .hd button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:#fff}
 .stage{flex:1;position:relative;display:flex;align-items:center;justify-content:center;padding:14px;overflow:hidden}
-.sc{position:absolute;width:min(92vw,440px);height:min(76vh,680px);border-radius:16px;overflow:hidden;
+.sc{position:absolute;width:min(92vw,440px);height:min(76vh,680px);max-height:calc(100% - 8px);border-radius:16px;overflow:hidden;
   background:#111;box-shadow:0 14px 40px rgba(0,0,0,.35);touch-action:none;user-select:none;-webkit-user-select:none;will-change:transform}
 .sc.back{transform:scale(.95) translateY(12px);opacity:.6;pointer-events:none}
 .sc img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;-webkit-user-drag:none}
@@ -289,6 +308,11 @@ aside.open .done{display:block;position:sticky;bottom:0;width:100%;padding:13px;
     </div>
     <div id="out"></div>
   </main>
+
+  <div class="mbar">
+    <button id="mFilt">篩選</button>
+    <button class="pri" id="mSwipe">⚡ 滑卡</button>
+  </div>
 </div>
 
 <script>
@@ -868,6 +892,8 @@ function swUndo() {
 /* ---------- 事件 ---------- */
 function bind() {
   $('#swOpen').onclick = swOpen;
+  $('#mSwipe').onclick = swOpen;
+  $('#mFilt').onclick = openFilters;
   $('#filtDone').onclick = closeFilters;
   $('#dist').oninput = (e) => { F.dist = +e.target.value; render(); };
   for (const [id, key] of [['#pMin','pMin'],['#pMax','pMax'],['#aMin','aMin'],['#aMax','aMax']]) {
