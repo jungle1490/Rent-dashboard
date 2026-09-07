@@ -11,3 +11,9 @@ tree=$(printf '%s\n' "$entries" | git mktree)
 commit=$(echo "data $(date -u +%FT%TZ)" | git -c user.name=rent-bot -c user.email=rent-bot@local commit-tree "$tree")
 git push --force --quiet origin "$commit:refs/heads/data"
 echo "已推送 data 分支：$commit（data.json $(du -h site/data.json | cut -f1)$( [ -s site/fb.json ] && echo ", fb.json $(du -h site/fb.json | cut -f1)" ))"
+# 孤兒分支裡沒有 workflow 檔，GitHub 不會因為推 data 而跑發布 → 這裡直接觸發 main 上的發布 workflow
+if command -v gh >/dev/null && gh auth status >/dev/null 2>&1; then
+  gh workflow run scrape.yml --ref main >/dev/null && echo "已觸發發布 workflow（約 1 分鐘後上線）"
+else
+  echo "警告：gh 未登入，無法觸發發布；請到 GitHub Actions 手動 Run workflow，或 gh auth login"
+fi

@@ -2,6 +2,8 @@ name: 發布看板
 
 # 抓取在使用者的 Mac 上跑（ADR-0003：591 擋 GitHub 的機房 IP），結果 force push 到孤兒分支 data。
 # 這裡只把 data 分支的檔案疊到 site/ 然後部署 Pages。
+# 注意：推 data 分支不會觸發這個 workflow（孤兒分支裡沒有 workflow 檔），
+# 所以 tools/publish.sh 推完會用 `gh workflow run` 觸發；下面的 branches: [data] 只是保險。
 
 on:
   push:

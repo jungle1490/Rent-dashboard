@@ -15,7 +15,7 @@ VERIFIED：GitHub Actions（Azure centralus）打 `rent.591.com.tw` 一律 HTTP 
 
 - 抓取（591 與 FB）全部在使用者的 Mac 上由 launchd 排程執行（`tools/run-local.sh`，預設每天 08:00，錯過時喚醒後補跑）。
 - 結果以 **孤兒分支 `data` force push**（`tools/publish.sh`，用 git 底層指令做單一 commit，不碰工作樹）：repo 歷史不成長。
-- GitHub Actions 只做發布：push 到 `main` 或 `data` → 取 `data` 分支的 `data.json`／`fb.json` 疊到 `site/` → 部署 Pages。不再有 cron、不再抓 591、不再需要 cache 與 keepalive。
+- GitHub Actions 只做發布：`tools/publish.sh` 推完 `data` 後以 `gh workflow run` 觸發（VERIFIED：推孤兒分支不會自動觸發，因為該分支沒有 workflow 檔）→ 取 `data` 分支的 `data.json`／`fb.json` 疊到 `site/` → 部署 Pages。不再有 cron、不再抓 591、不再需要 cache 與 keepalive。
 - 跨輪連續性（新上架／降價／已下架）由 Mac 本機的 `site/data.json` 保存。
 
 ## Rationale
