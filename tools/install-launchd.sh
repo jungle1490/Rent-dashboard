@@ -20,4 +20,21 @@ PL
 launchctl bootout "gui/$(id -u)/com.rent-dashboard.daily" 2>/dev/null || true
 launchctl bootstrap "gui/$(id -u)" "$PLIST"
 echo "已安裝：每天 ${HOUR}:00 執行 $ROOT/tools/run-local.sh"
+
+# 第二個工作：每 5 分鐘看 refresh 分支有沒有人按「請 Mac 抓新資料」
+PLIST2="$HOME/Library/LaunchAgents/com.rent-dashboard.poll.plist"
+cat > "$PLIST2" <<PL
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0"><dict>
+  <key>Label</key><string>com.rent-dashboard.poll</string>
+  <key>ProgramArguments</key><array><string>/bin/bash</string><string>$ROOT/tools/poll-refresh.sh</string></array>
+  <key>StartInterval</key><integer>300</integer>
+  <key>StandardOutPath</key><string>$ROOT/logs/poll.out</string>
+  <key>StandardErrorPath</key><string>$ROOT/logs/poll.err</string>
+</dict></plist>
+PL
+launchctl bootout "gui/$(id -u)/com.rent-dashboard.poll" 2>/dev/null || true
+launchctl bootstrap "gui/$(id -u)" "$PLIST2"
+echo "已安裝：每 5 分鐘檢查 refresh 分支（tools/poll-refresh.sh）"
 echo "現在手動跑一次：bash $ROOT/tools/run-local.sh"

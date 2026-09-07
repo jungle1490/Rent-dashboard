@@ -47,6 +47,9 @@ bash tools/run-local.sh              # 現在先跑一次（約 5 分鐘）
 
 跑完約一分鐘後網址就有資料。之後每天自動。
 
+想在排程以外「現在就抓」：看板頂端「⚡ 請 Mac 抓新資料」→ GitHub 的 Run workflow 按一下（手機 GitHub App 也行），
+或 `gh workflow run refresh.yml`。Mac 每 5 分鐘檢查一次，抓完約 5 分鐘上線。Mac 睡著就等它醒。
+
 ## 調整抓取範圍
 
 改 `config.json`：

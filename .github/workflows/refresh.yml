@@ -1,0 +1,24 @@
+name: 請 Mac 抓新資料
+
+# 任何人／任何裝置都可以按：GitHub 網頁或 App 的 Run workflow、gh workflow run、cloud routine。
+# 這個 workflow 本身不抓 591（GitHub 的 IP 被 591 擋），只在 refresh 分支寫一個時間戳；
+# Mac 上的 tools/poll-refresh.sh 每 5 分鐘看一次，發現有新的就跑 tools/run-local.sh。
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  mark:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 在 refresh 分支寫時間戳
+        run: |
+          git init -q mark && cd mark
+          git config user.name rent-bot && git config user.email rent-bot@local
+          echo "requested $(date -u +%FT%TZ) by ${{ github.actor }}" > REQUEST
+          git add REQUEST && git commit -qm "refresh request"
+          git push -q --force "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}" HEAD:refs/heads/refresh
+          echo "已寫入 refresh 分支；Mac 最多 5 分鐘內開始抓，抓完約 5 分鐘上線"
