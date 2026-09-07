@@ -28,7 +28,7 @@
   let stale = 0, last = countNow();
   for (let i = 0; i < MAX_SCROLLS && countNow() < MIN_POSTS; i++) {
     window.scrollBy(0, 1800); await sleep(1400);
-    [...document.querySelectorAll('div[role="button"]')]
+    [...(document.querySelector('[role="feed"]') || document).querySelectorAll('div[role="button"]')]
       .filter((b) => /^(?:顯示更多|查看更多|See more)$/.test(b.innerText.trim())).forEach((b) => b.click());
     const n = countNow(); stale = n > last ? 0 : stale + 1; last = n;
     if (stale >= 8) break;
@@ -53,12 +53,10 @@
       posts.set(id, { id, link: location.href.replace(/[#].*$/, ''), text, postedText: '', images: [...new Set(images)].slice(0, 8), fromSearch: true });
     }
   }
-  for (const a of isSearch ? [] : document.querySelectorAll(sel)) {
-    const link = norm(a.href); if (posts.has(link)) continue;
-    // 從永久連結往上爬，爬到「再上去就會包到別篇貼文」為止，那層就是這篇的容器
-    let el = a, box = null;
-    for (let d = 0; d < 16 && el.parentElement; d++) { el = el.parentElement; if (uniq(el) > 1) break; box = el; }
-    if (!box) continue;
+  // 動態牆：貼文容器 = [role=feed] 的直接子元素且恰含 1 個永久連結（往上爬 16 層只會爬到標頭，本文在更深層）
+  const feedBoxes = isSearch ? [] : [...(document.querySelector('[role="feed"]')?.children || [])].filter((b) => uniq(b) === 1);
+  for (const box of feedBoxes) {
+    const a = box.querySelector(sel); const link = norm(a.href); if (posts.has(link)) continue;
     const paras = [...box.querySelectorAll('div[dir="auto"]')].map((x) => clean(x.innerText)).filter((t) => t.length > 1);
     // 展開前後的版本會重複、留言也混在裡面：去重後只保留到「顯示較少」之前
     let text = [...new Set(paras)].join('\n');
@@ -79,8 +77,11 @@
   if (!out.posts.length) { alert('抽到 0 篇。可能動態還沒載入（再等幾秒重跑），或 FB 改版了。'); return out; }
   // 若 Mac 上開著 tools/fb-receiver.py（只聽 localhost），直接送過去，圖片網址不會被剪貼簿或擴充功能弄丟
   if (window.__fbPost) {
-    try { const r = await fetch(window.__fbPost, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: json });
-      if (r.ok) { window.__fbExtract = out; console.log(`已送到 ${window.__fbPost}：${out.posts.length} 篇`); return out; } } catch (e) { console.warn('送到本機接收器失敗', e); }
+    window.__fbExtract = out;
+    // FB 的 CSP 不准頁面 fetch localhost，所以改成「導向接收器的頁面、資料放在 # 後面」，由那頁再存檔。
+    // 導向後可按上一頁回到 FB。
+    location.href = window.__fbPost.replace(/\/?$/, '/') + '#' + encodeURIComponent(json);
+    return out;
   }
   try { await navigator.clipboard.writeText(json); alert(`抽到 ${out.posts.length} 篇，JSON 已複製到剪貼簿。`); }
   catch { console.log(json); alert(`抽到 ${out.posts.length} 篇。剪貼簿不可用，JSON 已印在 Console。`); }
