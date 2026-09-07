@@ -25,7 +25,10 @@ _Last rewritten: 2026-09-08 by Claude Fable 5.1（session-end）._
 - `fb-extract.js` 支援社團搜尋結果頁（全文＋圖較齊、可先篩「最新／發佈日期」，但無永久連結與日期）。
 - 滑卡左滑＝排除＋已看（T-013）。
 - Claude 雲端 routine：建立被拒（HTTP 401「Connect your GitHub account」），需使用者到 claude.ai 連 GitHub 後再建；routine 的作用只是每天 12:00 往 refresh 分支寫時間戳。
-- T-010（FB 每日自動抽取）未開始；subagent 正用 Chrome 抽 4 個社團到 logs/fb-inbox/。
+- Claude routine `trig_011eqoixaAeJio9HndESiaBM` 每天 12:00（台北）推 refresh 分支 → Mac 抓；VERIFIED 端到端（需 Claude GitHub App 裝在 repo）。
+- FB：4 個社團（459966811445588、305665579858865、221614965050605、313385739282042）由 subagent 用 Chrome 抽 95 篇 → 匯入 87 筆（有圖 82、有價 77、有區 52）已發布。
+  學到（VERIFIED）：FB CSP 擋頁面 fetch localhost → fb-extract 改導向接收器 relay 頁（hash 帶資料）；動態牆容器＝feed 直接子元素含 1 個永久連結；按鈕只點 feed 內；305665579858865 是商品型社團，動態牆幾乎沒貼文，用搜尋頁。
+- T-010（FB 每日自動抽取）未開始。
 
 ## Next (ordered)
 
