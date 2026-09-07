@@ -2,21 +2,30 @@
 // 只做 DOM → 原始貼文 JSON；欄位抽取在 core/text-extract.mjs（tools/fb-import.mjs 會呼叫）。
 // 不會送出任何請求、不碰你的帳號，等同於你自己捲頁面把看到的文字抄下來。
 (async () => {
-  const SCROLLS = 12;                       // 捲幾次（每次約 1.5 秒），社團動態很慢
+  const MIN_POSTS = window.__fbMinPosts || 20;   // 至少抓到這麼多篇才停
+  const MAX_SCROLLS = 60;                         // 保險上限（約 90 秒）
   const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
   const gid = (location.pathname.match(/\/groups\/(\d+)/) || [])[1];
   if (!gid) return alert('請在 facebook.com/groups/<數字> 的社團頁（或其搜尋結果頁）執行');
   const groupName = (document.title.replace(/^\(\d+\)\s*/, '').split('|')[0] || '').trim();
 
-  for (let i = 0; i < SCROLLS; i++) {
-    window.scrollBy(0, 1600); await sleep(1500);
+  const clean = (s) => s.replace(/[͏​-‏⁠﻿]/g, '').replace(/[ \t]+/g, ' ').trim();
+  const sel = `a[href*="/groups/${gid}/posts/"], a[href*="/groups/${gid}/permalink/"]`;
+  const isSearch = /\/search\//.test(location.pathname);
+  const countNow = () => isSearch
+    ? [...(document.querySelector('[role="feed"]')?.children || [])].filter((b) => b.innerText.trim().length > 40).length
+    : new Set([...document.querySelectorAll(sel)].map((a) => a.href.replace(/[?#].*$/, ''))).size;
+  // 自動捲到夠為止：連續 8 次沒長出新貼文就當作到底了
+  let stale = 0, last = countNow();
+  for (let i = 0; i < MAX_SCROLLS && countNow() < MIN_POSTS; i++) {
+    window.scrollBy(0, 1800); await sleep(1400);
     [...document.querySelectorAll('div[role="button"]')]
       .filter((b) => /^(?:顯示更多|查看更多|See more)$/.test(b.innerText.trim())).forEach((b) => b.click());
+    const n = countNow(); stale = n > last ? 0 : stale + 1; last = n;
+    if (stale >= 8) break;
   }
   await sleep(1200);
 
-  const clean = (s) => s.replace(/[͏​-‏⁠﻿]/g, '').replace(/[ \t]+/g, ' ').trim();
-  const sel = `a[href*="/groups/${gid}/posts/"], a[href*="/groups/${gid}/permalink/"]`;
   const norm = (h) => h.replace(/[?#].*$/, '');
   const uniq = (el) => new Set([...el.querySelectorAll(sel)].map((a) => norm(a.href))).size;
 
@@ -24,7 +33,6 @@
   // 社團「關鍵字搜尋」結果頁（/groups/<id>/search/?q=…）：貼文全文與圖片都在，但沒有永久連結、沒有日期，
   // 用本文雜湊當 id，連結先指回搜尋頁。好處是可以先用「最新」與「發佈日期」篩選，比動態牆有效率。
   const hash = (t) => { let h = 0; for (const c of t) h = (h * 31 + c.charCodeAt(0)) >>> 0; return h.toString(36); };
-  const isSearch = /\/search\//.test(location.pathname);
   if (isSearch) {
     const feed = document.querySelector('[role="feed"]');
     for (const box of feed ? [...feed.children] : []) {
@@ -60,6 +68,11 @@
                 capturedAt: new Date().toISOString(), posts: [...posts.values()] };
   const json = JSON.stringify(out, null, 0);
   if (!out.posts.length) { alert('抽到 0 篇。可能動態還沒載入（再等幾秒重跑），或 FB 改版了。'); return out; }
+  // 若 Mac 上開著 tools/fb-receiver.py（只聽 localhost），直接送過去，圖片網址不會被剪貼簿或擴充功能弄丟
+  if (window.__fbPost) {
+    try { const r = await fetch(window.__fbPost, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: json });
+      if (r.ok) { window.__fbExtract = out; console.log(`已送到 ${window.__fbPost}：${out.posts.length} 篇`); return out; } } catch (e) { console.warn('送到本機接收器失敗', e); }
+  }
   try { await navigator.clipboard.writeText(json); alert(`抽到 ${out.posts.length} 篇，JSON 已複製到剪貼簿。`); }
   catch { console.log(json); alert(`抽到 ${out.posts.length} 篇。剪貼簿不可用，JSON 已印在 Console。`); }
   window.__fbExtract = out;

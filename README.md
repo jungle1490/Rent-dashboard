@@ -32,7 +32,10 @@ GitHub Actions（push 到 main／data 就跑）
 為什麼不在 GitHub 上抓：591 對 GitHub Actions 的機房 IP 回 403（CloudFront 封鎖），只有台灣的 IP 打得到。
 所以資料的新鮮度＝你的 Mac 最後一次執行；網址本身隨時都開得到。
 
-FB 社團房源：在你登入的瀏覽器裡跑 `tools/fb-extract.js`，貼進看板「匯入」或 `node tools/fb-import.mjs`（見 docs/adr/ADR-0002）。
+FB 社團房源：在你登入的瀏覽器裡跑 `tools/fb-extract.js`（會自動捲到至少 20 篇；社團的關鍵字搜尋頁也能跑，效率更好），
+貼進看板「匯入」或 `node tools/fb-import.mjs`。要連圖片一起帶回：先 `python3 tools/fb-receiver.py`，在 Console 先執行
+`window.__fbPost='http://localhost:8898/'` 再貼腳本，結果會落在 `logs/fb-inbox/`（見 docs/adr/ADR-0002）。
+追蹤的社團：459966811445588、305665579858865、221614965050605、313385739282042。
 
 ## 安裝
 
