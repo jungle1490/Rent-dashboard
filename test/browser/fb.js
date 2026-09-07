@@ -1,0 +1,40 @@
+// FB 房源驗收（T-007，1280×800）。會清掉本機匯入。全部布林 true 才算過。
+(async () => {
+  const R = {}; const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+  localStorage.removeItem('rent591.fbImport'); document.querySelector('#resetAll').click();
+  const cnt = () => +document.querySelector('#count').textContent.match(/^([\d,]+)/)[1].replace(/,/g, '');
+  const fbChip = () => [...document.querySelectorAll('#srcChips .chip')].find((c) => c.textContent.startsWith('FB'));
+  R.fbLoaded = DATA.fbCount >= 1;
+  fbChip().click(); await wait(100);
+  const base = cnt();
+  const out = document.querySelector('#out').innerHTML;
+  R.fbBadge = [...document.querySelectorAll('.card')].every((c) => c.querySelector('.badge.src'));
+  R.noNullText = !/\bnull\b|undefined|NaN/.test(out);
+  R.fbLink = document.querySelector('.card .ttl').href.includes('facebook.com/groups/');
+  document.querySelector('#sort').value = 'priceAsc'; document.querySelector('#sort').dispatchEvent(new Event('change')); await wait(100);
+  R.sortOk = cnt() === base;
+  document.querySelector('.card .ttl').click(); await wait(300);
+  R.panelRaw = !!document.querySelector('.ov .raw') && /Facebook/.test(document.querySelector('.ov .go').textContent);
+  R.panelNoNull = !/\bnull\b|undefined|NaN/.test(document.querySelector('.ov .dlg').innerHTML);
+  history.back(); await wait(350);
+  document.querySelector('#impOpen').click(); await wait(300);
+  R.importOpens = !!document.querySelector('.imp') && history.state?.imp === 1;
+  const raw = { group: { id: '999', name: '測試社團', url: 'https://www.facebook.com/groups/999/' }, capturedAt: new Date().toISOString(),
+    posts: [{ id: '1', link: 'https://www.facebook.com/groups/999/posts/1/', text: '大安區套房出租 近捷運科技大樓站 歡迎私訊', imageCount: 2 }] };
+  document.querySelector('.imp textarea').value = JSON.stringify(raw);
+  document.querySelector('.imp [data-go]').click(); await wait(1000);
+  R.imported = DATA.fbCount === base + 1;
+  history.back(); await wait(350);
+  R.importClosed = !document.querySelector('.imp');
+  document.querySelector('#resetAll').click(); fbChip().click();
+  const pm = document.querySelector('#pMax'); pm.value = 5000; pm.dispatchEvent(new Event('input')); await wait(100);
+  R.nullPricePasses = cnt() === 1 && /未標價/.test(document.querySelector('.card .price').textContent);
+  document.querySelector('#hideUnk').click(); await wait(100);
+  R.hideUnknownExcludes = cnt() === 0;
+  document.querySelector('#hideUnk').click();
+  R.stationFromImport = DATA.listings.find((l) => l.id === 'fb:1')?.station === '科技大樓';
+  R.districtFromImport = DATA.listings.find((l) => l.id === 'fb:1')?.district === '大安區';
+  localStorage.removeItem('rent591.fbImport'); document.querySelector('#resetAll').click();
+  R.allTrue = Object.values(R).filter((v) => typeof v === 'boolean').every(Boolean);
+  return R;
+})();

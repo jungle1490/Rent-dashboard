@@ -28,6 +28,9 @@ _Last rewritten: 2026-09-08 by Claude Fable 5.1（session-end）._
 
 ## Active warnings
 
+- **覆蓋層驗收要檢查元素在視窗內**（`getBoundingClientRect()`），不能只看 `display`；2026-09-08 篩選抽屜因此漏掉「完成鈕在畫面外」的 bug（docs/playbooks/ui.md）。
+- 前端驗收腳本在 `test/browser/*.js`（貼到 Console 跑）；前端沒有單元測試，抽離是 T-004。
+
 - **本機開發要先 `cp core/*.mjs site/`**（網頁動態 import；這兩個複本已 gitignore，workflow 會複製）。
 - agent 透過 Chrome 擴充功能代跑 FB 抽取**拿不到圖片網址**（簽章 query string 被擋）；使用者自己跑書籤小工具才有圖。
 - FB 動態載入極慢，8 次捲動只出 3 篇；第二個社團頁面曾讓 JS 執行逾時 45 秒。

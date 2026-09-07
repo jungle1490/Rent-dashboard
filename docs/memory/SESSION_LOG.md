@@ -9,5 +9,7 @@
   Meta Groups API 2024-04 停用、未登入取社團頁 HTTP 400 [VERIFIED]；登入 Chrome 的 DOM 可取貼文本文／永久連結，作者時間區塊有字元打散 [VERIFIED]；
   中文後的 `\b` 不成立、CJK 單位要用 `(?!\d)` [VERIFIED 測試]；GitHub 60 天無 commit 停用排程 → 需 keepalive [INFERRED 自 GitHub 文件與社群]。
 - Blocked: 推送曾卡 GitHub 憑證（使用者 `gh auth login` 後解除）；FB 圖片網址無法經擴充功能取回。
-- Next: 使用者設 Pages Source = GitHub Actions 並手動跑第一次，確認 https://jungle1490.github.io/Rent-dashboard/ 可開。
+- Fix（使用者回報「篩選面板關不掉」）：重現於 390×844——`aside.open` 高度長到 1241px 不捲動、完成鈕在畫面外；且抽屜沒走 history、返回會離站。
+  修 `height:100%` + 抽屜 pushState／back + 頂部 ✕；驗收腳本改查元素在視窗內；`test/browser/{drawer,swipe,fb}.js` 入庫；playbooks/ui.md。[VERIFIED 12 項斷言]
+- Next: 使用者設 Pages Source = GitHub Actions 並手動跑第一次，確認 https://jungle1490.github.io/Rent-dashboard/ 可開（目前 404 = 未設定）。
 
