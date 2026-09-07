@@ -1,0 +1,58 @@
+name: 抓取 591 租屋資料
+
+on:
+  schedule:
+    - cron: '*/30 * * * *'   # 每 30 分鐘（GitHub 排程為盡力而為，尖峰時可能延後幾分鐘）
+  workflow_dispatch:          # 也可以到 Actions 頁面手動觸發
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  scrape-and-deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      # 取回上一次的結果：用來判斷哪些是「新上架」、保留首次出現時間
+      - name: 還原上次的資料
+        uses: actions/cache/restore@v4
+        with:
+          path: docs/data.json
+          key: rent-data-${{ github.run_id }}
+          restore-keys: rent-data-
+
+      - name: 抓取
+        run: node scrape.mjs
+
+      - name: 保存這次的資料
+        uses: actions/cache/save@v4
+        if: always()
+        with:
+          path: docs/data.json
+          key: rent-data-${{ github.run_id }}
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: docs
+
+      - name: 發布到 GitHub Pages
+        id: deploy
+        uses: actions/deploy-pages@v4

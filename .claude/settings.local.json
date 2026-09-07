@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(curl -s -o /private/tmp/claude-501/-Users-joejungle-Claude-Rent/80a4828e-3620-4b31-a646-640dd6a31bbb/scratchpad/list.html -w 'HTTP:%{http_code} SIZE:%{size_download}\\\\n' -H 'User-Agent: Mozilla/5.0 \\(Macintosh; Intel Mac OS X 10_15_7\\) AppleWebKit/537.36 \\(KHTML, like Gecko\\) Chrome/126.0 Safari/537.36' 'https://rent.591.com.tw/list?region=1&price=20000_30000&kind=1&metro=148&mrt_distance=1000&station=4235,4236,66305,4186,66266,4180&page=1')",
+      "Bash(curl -s -w '\\\\nHTTP:%{http_code}\\\\n' -o api1.json -H 'User-Agent: Mozilla/5.0 \\(Macintosh; Intel Mac OS X 10_15_7\\) AppleWebKit/537.36 Chrome/126.0 Safari/537.36' -H 'Accept: application/json' 'https://bff.591.com.tw/v1/house/rent/list?region=1&price=20000_30000&kind=1&metro=148&station=4235,4236&limit=30')",
+      "Bash(python3 -c ' *)",
+      "Bash(curl -s -c cj.txt -o /dev/null -w \"HTTP:%{http_code}\\\\n\" -H \"User-Agent: Mozilla/5.0 \\(Macintosh; Intel Mac OS X 10_15_7\\) AppleWebKit/537.36 Chrome/126.0 Safari/537.36\" \"https://rent.591.com.tw/\")",
+      "Bash(awk '{print $6}')"
+    ]
+  }
+}

@@ -1,0 +1,31 @@
+# 租屋偵測系統設定檔
+
+telegram:
+  bot_token: "YOUR_BOT_TOKEN"
+  chat_id: "YOUR_CHAT_ID"
+
+github:
+  pat: "YOUR_GITHUB_PAT"
+  gist_id: "YOUR_GIST_ID"   # 建一個私有 Gist，內容填 {"seen_591":[],"seen_threads":[]}
+
+rent:
+  min: 20000
+  max: 35000
+
+layout:
+  - 套房
+  - 整層住家
+
+blacklist:
+  - 違建
+  - 凶宅
+
+electricity_keyword: 台電
+
+threads:
+  hashtags:
+    - 台北租屋
+  max_posts: 30
+
+schedule:
+  interval_minutes: 15

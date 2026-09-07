@@ -1,0 +1,9 @@
+{
+  "_comment": "抓取範圍。抓寬一點沒關係，細部篩選都在 UI 上做。region=1 是台北市。kind: 1=整層住家 2=獨立套房 3=分租套房 4=雅房",
+  "queries": [
+    { "name": "台北市 整層住家 1.5-4.5萬", "query": "region=1&kind=1&price=15000_45000" },
+    { "name": "台北市 獨立套房 1.5-4.5萬", "query": "region=1&kind=2&price=15000_45000" }
+  ],
+  "maxPagesPerQuery": 120,
+  "delayMs": 700
+}
