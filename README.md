@@ -24,6 +24,9 @@ GitHub Actions（每 30 分鐘，雲端跑，電腦關機也不影響）
    └─ scrape.mjs 抓 591 → 產生 docs/data.json
               ↓
 GitHub Pages ← 直接發布 docs/（不 commit 資料，repo 不會被歷史撐大）
+
+keepalive.yml（每週一次）
+   └─ 推一個時間戳 commit，避免排程被 GitHub 判定閒置而停用
 ```
 
 上一輪的結果透過 Actions cache 帶到下一輪，用來判斷新上架和降價。
@@ -70,8 +73,9 @@ node scrape.mjs && python3 -m http.server 8899 --directory docs
 - **抓取頻率**：預設每 30 分鐘、每頁間隔 0.7 秒，對 591 是很輕的負擔。不建議再調高。
 - **591 改版**：`scrape.mjs` 依賴 591 頁面內嵌的 `window.__NUXT__` 資料。如果 591 改版，
   抓取會直接報錯中止（不會用空資料覆蓋掉舊的），Actions 會寄失敗通知給你。
-- **排程休眠**：GitHub 對「60 天內沒有任何 commit」的 repo 會自動停用排程。
-  真的擱置太久，去 Actions 頁面手動觸發一次就會恢復。
+- **排程休眠**：GitHub 會自動停用「60 天內沒有 repo 活動」的排程。因為這個 repo 刻意
+  不把資料 commit 進版控，正常情況下不會有新 commit，所以另外放了 `keepalive.yml`，
+  每週推一個時間戳 commit 當活動證明。真的還是被停用了，去 Actions 頁面手動觸發一次就會恢復。
 - **收藏／排除存在瀏覽器本機**，換裝置或清快取不會同步。要跨裝置同步得另外接儲存。
 
 `legacy/` 是先前 Telegram 推播版本的檔案，沒有在用，留著參考。
