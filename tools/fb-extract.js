@@ -1,4 +1,7 @@
 // 在「已登入」的 Facebook 社團頁面執行（DevTools Console 貼上，或做成書籤小工具）。
+// 建議網址：
+//   搜尋頁  https://www.facebook.com/groups/<id>/search/?q=出租   （腳本會自動打開「最新」開關，依發文時間排序）
+//   動態牆  https://www.facebook.com/groups/<id>/?sorting_setting=CHRONOLOGICAL   （新貼文優先）
 // 只做 DOM → 原始貼文 JSON；欄位抽取在 core/text-extract.mjs（tools/fb-import.mjs 會呼叫）。
 // 不會送出任何請求、不碰你的帳號，等同於你自己捲頁面把看到的文字抄下來。
 (async () => {
@@ -15,6 +18,12 @@
   const countNow = () => isSearch
     ? [...(document.querySelector('[role="feed"]')?.children || [])].filter((b) => b.innerText.trim().length > 40).length
     : new Set([...document.querySelectorAll(sel)].map((a) => a.href.replace(/[?#].*$/, ''))).size;
+  // 搜尋頁：先把左側「最新」開關打開（依發文時間排序），沒開的話結果是「最相關」
+  if (isSearch) {
+    const sw = [...document.querySelectorAll('[role="switch"], input[type="checkbox"]')]
+      .find((el) => /最新|Most recent/.test((el.closest('label, div')?.innerText || el.getAttribute('aria-label') || '')));
+    if (sw && sw.getAttribute('aria-checked') !== 'true' && !sw.checked) { sw.click(); await sleep(2500); }
+  }
   // 自動捲到夠為止：連續 8 次沒長出新貼文就當作到底了
   let stale = 0, last = countNow();
   for (let i = 0; i < MAX_SCROLLS && countNow() < MIN_POSTS; i++) {
