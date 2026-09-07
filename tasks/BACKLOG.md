@@ -27,6 +27,10 @@ Tier legend: **low** = any model · **mid** = capable coding model · **TOP** = 
 
 - [ ] **T-011** 看板按鈕遠端叫醒 Mac 抓取：Mac 每 5 分鐘輪詢觸發訊號（GitHub UI 手動觸發／PAT／Tailscale Funnel 三選一）→ run-local.sh；頁面自動偵測到新資料 — mid（待使用者選觸發方式）
 
+- [ ] **T-012** scrape.mjs 改打 591 BFF API（`bff-house.591.com.tw/v3/web/rent/list`）— mid
+      VERIFIED 不用登入／deviceid；欄位與 __NUXT__ 相同（56 欄）；分頁不是 `page=`（page=2 回同一頁），回應有 `firstRow`，應改 `firstRow=30,60…` 實測。
+      好處：不用 vm 沙箱、不受 HTML 改版影響。仍只能從台灣 IP 打（Actions 一樣被 CloudFront 403）。core 為 FROZEN，需卡片。
+
 ## Later
 
 - [ ] 收藏／排除／已看跨裝置同步（見 QUESTIONS.md）

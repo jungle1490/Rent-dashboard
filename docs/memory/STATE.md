@@ -39,6 +39,7 @@ _Last rewritten: 2026-09-08 by Claude Fable 5.1（session-end）._
 - agent 透過 Chrome 擴充功能代跑 FB 抽取**拿不到圖片網址**（簽章 query string 被擋）；使用者自己跑書籤小工具才有圖。
 - FB 動態載入極慢，8 次捲動只出 3 篇；第二個社團頁面曾讓 JS 執行逾時 45 秒。
 - **所有 `uses:` 都 startup_failure 且 API 不給原因時，先查 `gh api repos/…/actions/permissions`**（playbooks/ci.md）。
+- 591 BFF API（`bff-house…/v3/web/rent/list`）不用登入即可用，但：網頁跨網域被擋（CORS 只允許 591 網域）、GitHub Actions 一樣 CloudFront 403。可當 Mac 端更乾淨的資料源（T-012）。
 - `run-local.sh` 用 nvm 的 node（launchd PATH 很短，腳本自己找）。
 - 「新上架」徽章要等資料累積 36 小時才有意義（首輪全是新的，UI 自動關閉）。
 - `scrape.mjs` 的 core 區段與 `mrt-lines.json` 是 FROZEN（CLAUDE.md）。

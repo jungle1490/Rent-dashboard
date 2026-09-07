@@ -6,3 +6,4 @@
 | Actions 抓 591 回 403 | CloudFront 對非台灣／機房 IP 封鎖，改 header 無效 | 抓取搬到台灣的機器（ADR-0003） | diag workflow：`server: CloudFront`「Request blocked」 |
 | `gh run view --log-failed` 空白、`check-runs` 為空 | startup_failure 沒有 job，就沒有 log | 用「純 run 最小 workflow」與「加一個 uses」對照，一輪就能分出是設定還是 YAML | 同上 |
 | 推了 `data` 分支但沒有發布 run | 孤兒分支沒有 `.github/workflows`，GitHub 只為含 workflow 檔的 ref 觸發 | `publish.sh` 推完 `gh workflow run scrape.yml --ref main` | 2026-09-08 首次 run-local：data 更新但無 data 分支的 run |
+| 想讓網頁直接打 591 BFF API | 正式 GET 只對 `*.591.com.tw` 的 Origin 回 `Access-Control-Allow-Origin`（預檢會反射任意 Origin，但瀏覽器看正式回應）；且 bff-house 同樣在 CloudFront 後，機房 IP 403 | 放棄；API 只給台灣機器上的程式用（T-012） | 2026-09-08 本機 A/B/C/D 探測 + Actions run 34151453493 |

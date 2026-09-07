@@ -16,5 +16,6 @@
 - 使用者同意 → gh api 改 Actions 權限 `all`、Pages `build_type=workflow`；推送後發布 success；網址 200、data.json 5.7MB、fb.json、fb-listing.mjs 皆 200 [VERIFIED curl]。
 - 首次 run-local 成功；發現推 data 分支不觸發發布 → publish.sh 加 `gh workflow run`，實測 dispatch success [VERIFIED]。
 - 加「更新資料」鈕；VERIFIED 591 回應無 `Access-Control-Allow-Origin`，網頁不能直接抓 591。
+- 使用者提供 591 BFF API curl（含其登入 cookie，未使用、未儲存）：VERIFIED 無需登入；CORS 僅允許 591 網域；Actions 打它也 403 → 網頁直接抓與雲端抓皆不可行；記 T-012 改用此 API 於 Mac 端。
 - Next: 使用者決定 T-011（遠端叫醒 Mac）的觸發方式；T-010 FB 每日自動。
 
