@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// 從 591 抓台北市租屋物件，輸出 docs/data.json 供前端 UI 使用。
+// 從 591 抓台北市租屋物件，輸出 site/data.json 供前端 UI 使用。
 //
 // 591 把清單資料以壓縮過的 JS（window.__NUXT__）內嵌在 HTML 裡，必須用 JS 引擎求值。
 // 遠端內容一律當成不可信：在空 context 的 vm 沙箱裡跑，並設逾時，避免碰到 fs / net / process。
@@ -12,7 +12,7 @@ import { fileURLToPath } from 'node:url';
 
 const UA = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36';
 const ROOT = path.dirname(fileURLToPath(import.meta.url));
-const OUT = path.join(ROOT, 'docs', 'data.json');
+const OUT = path.join(ROOT, 'site', 'data.json');
 
 const cfg = JSON.parse(await readFile(path.join(ROOT, 'config.json'), 'utf8'));
 const MRT = JSON.parse(await readFile(path.join(ROOT, 'mrt-lines.json'), 'utf8'));

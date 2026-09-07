@@ -1,0 +1,23 @@
+# BACKLOG — ordered; check off when the Definition of Done passed
+
+Tier legend: **low** = any model · **mid** = capable coding model · **TOP** = top-tier only
+
+## M1 (MVP)
+
+- [x] **T-000** 抓取、看板、Actions 部署、詳細面板（init 前已完成，見 STATE.md）
+- [ ] **T-001** 滑卡模式 + 已看追蹤 — mid
+      只限新上架＋未看過（可切換）、套用目前篩選、右滑收藏、左滑跳過（仍在「全部」可見）、返回上一張、
+      點卡片切照片、「詳細」開面板；鍵盤 ←／→／Backspace；`rent591.seen`；看板加「未看過」分頁與「已看」徽章
+- [ ] **T-002** 手機版適配 — mid
+      篩選收成全螢幕抽屜（有「完成」鈕）、底部工具列（篩選／滑卡）、卡片單欄、safe-area
+- [ ] **T-003** 推上 GitHub — low
+      合併遠端 initial commit（README 以本地為準）、push、Settings → Pages → Source = GitHub Actions、手動跑第一次、確認網址
+- [ ] **T-004** 抽出 `core/` + 測試 — **TOP**
+      把 `normalize`、`resolveStation`、`parseContains` 移到 `core/`，`node --test` 覆蓋：站名 8 種寫法、費用拆解、價格逗號、gone 保留 7 天、<50% 中止
+- [ ] **T-005** ADR-0001 補完 alternatives 與 revisit trigger — low
+
+## Later
+
+- [ ] 收藏／排除／已看跨裝置同步（見 QUESTIONS.md）
+- [ ] 只對收藏物件抓 591 詳細頁補管理費細項（見 QUESTIONS.md）
+- [ ] 每坪單價、離站距離的分布直方圖，輔助設區間

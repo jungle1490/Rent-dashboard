@@ -4,7 +4,7 @@
     {
       "name": "rent-ui",
       "runtimeExecutable": "python3",
-      "runtimeArgs": ["-m", "http.server", "8899", "--directory", "docs"],
+      "runtimeArgs": ["-m", "http.server", "8899", "--directory", "site"],
       "port": 8899
     }
   ]

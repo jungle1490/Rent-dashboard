@@ -21,9 +21,9 @@
 
 ```
 GitHub Actions（每 30 分鐘，雲端跑，電腦關機也不影響）
-   └─ scrape.mjs 抓 591 → 產生 docs/data.json
+   └─ scrape.mjs 抓 591 → 產生 site/data.json
               ↓
-GitHub Pages ← 直接發布 docs/（不 commit 資料，repo 不會被歷史撐大）
+GitHub Pages ← 直接發布 site/（不 commit 資料，repo 不會被歷史撐大）
 
 keepalive.yml（每週一次）
    └─ 推一個時間戳 commit，避免排程被 GitHub 判定閒置而停用
@@ -65,7 +65,7 @@ keepalive.yml（每週一次）
 ## 本機測試
 
 ```bash
-node scrape.mjs && python3 -m http.server 8899 --directory docs
+node scrape.mjs && python3 -m http.server 8899 --directory site
 ```
 
 ## 注意事項

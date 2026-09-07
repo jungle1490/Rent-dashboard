@@ -33,7 +33,7 @@ jobs:
       - name: 還原上次的資料
         uses: actions/cache/restore@v4
         with:
-          path: docs/data.json
+          path: site/data.json
           key: rent-data-${{ github.run_id }}
           restore-keys: rent-data-
 
@@ -44,14 +44,14 @@ jobs:
         uses: actions/cache/save@v4
         if: always()
         with:
-          path: docs/data.json
+          path: site/data.json
           key: rent-data-${{ github.run_id }}
 
       - uses: actions/configure-pages@v5
 
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: docs
+          path: site
 
       - name: 發布到 GitHub Pages
         id: deploy
