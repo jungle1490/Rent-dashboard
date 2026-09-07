@@ -10,7 +10,7 @@ Tier legend: **low** = any model · **mid** = capable coding model · **TOP** = 
       點卡片切照片、「詳細」開面板；鍵盤 ←／→／Backspace；`rent591.seen`；看板加「未看過」分頁與「已看」徽章
 - [x] **T-002** 手機版適配 — mid（2026-09-08 完成，卡片 tasks/T-002-mobile.md）
       篩選收成全螢幕抽屜（有「完成」鈕）、底部工具列（篩選／滑卡）、卡片單欄、safe-area
-- [~] **T-003** 推上 GitHub — low（2026-09-08 已推送 `1df2058`；剩使用者設 Pages Source=GitHub Actions 並手動跑第一次）
+- [x] **T-003** 推上 GitHub — low（2026-09-08 完成：Pages Source 以 gh api 設為 workflow，網址 200）
       合併遠端 initial commit（README 以本地為準）、push、Settings → Pages → Source = GitHub Actions、手動跑第一次、確認網址
 - [ ] **T-004** 抽出 `core/` + 測試 — **TOP**
       把 `normalize`、`resolveStation`、`parseContains` 移到 `core/`，`node --test` 覆蓋：站名 8 種寫法、費用拆解、價格逗號、gone 保留 7 天、<50% 中止。
@@ -22,7 +22,7 @@ Tier legend: **low** = any model · **mid** = capable coding model · **TOP** = 
 
 - [ ] **T-008** 文字抽取補強：地標→行政區（天母→士林區、東區→大安區…）、插字的步行距離、多房價（「12000／14000／16000」取區間） — mid
 
-- [ ] **T-009** 抓取改到 Mac 排程 + 孤兒分支 data 發布（591 擋 Actions IP，ADR-0003）— mid
+- [x] **T-009** 抓取改到 Mac 排程 + 孤兒分支 data 發布（591 擋 Actions IP，ADR-0003）— mid（2026-09-08 完成：data 分支、發布 workflow 成功、launchd 每天 08:00）
 - [ ] **T-010** FB 每日自動抽取：AppleScript 驅動已登入的 Chrome 執行 fb-extract.js → fb-import → 併入 run-local.sh — mid
 
 ## Later

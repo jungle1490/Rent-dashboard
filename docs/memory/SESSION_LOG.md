@@ -13,5 +13,6 @@
   修 `height:100%` + 抽屜 pushState／back + 頂部 ✕；驗收腳本改查元素在視窗內；`test/browser/{drawer,swipe,fb}.js` 入庫；playbooks/ui.md。[VERIFIED 12 項斷言]
 - ADR-0003：591 對 Actions 回 CloudFront 403 [VERIFIED 診斷 workflow]，抓取改 Mac launchd 每日 + 孤兒分支 data + Actions 只發布；T-009 程式完成、data 分支已推、launchd 已裝。
 - 發布 workflow startup_failure：三輪切分（14 個變體）證明任何 `uses:` 都失敗、純 run 成功；`gh api …/actions/permissions` = `local_only` [VERIFIED]。待使用者同意改回 `all`。
-- Next: 使用者同意後改 Actions 權限 + Pages Source，跑一次發布，確認網址。
+- 使用者同意 → gh api 改 Actions 權限 `all`、Pages `build_type=workflow`；推送後發布 success；網址 200、data.json 5.7MB、fb.json、fb-listing.mjs 皆 200 [VERIFIED curl]。
+- Next: 看 `logs/` 確認首次 `run-local.sh` 全程成功；之後做 T-010（FB 每日自動）。
 

@@ -16,15 +16,14 @@ _Last rewritten: 2026-09-08 by Claude Fable 5.1（session-end）._
 
 ## In progress
 
-- **T-009（ADR-0003）程式已完成、`data` 分支已推（`d78f04f`，5.5MB data.json + fb.json）、launchd 已安裝（每天 08:00）。**
-- **卡在兩個 repo 設定（需使用者同意／操作）**：
-  1. Actions 權限是 `allowed_actions: local_only`（VERIFIED via `gh api …/actions/permissions`）→ 任何 `uses:` 都 startup_failure。要改回 `all`。
-  2. Pages Source 尚未設為 GitHub Actions（網址 404）。
-- 兩者未解前，發布 workflow 無法跑，網址打不開。
+- **看板已上線**：https://jungle1490.github.io/Rent-dashboard/ HTTP 200，data.json 3,869 筆、fb.json 2 筆（VERIFIED curl，2026-09-08）。
+  使用者同意後以 gh api 把 Actions 權限改回 `all`、Pages Source 設為 workflow；發布 run 34150554393 success。
+- launchd `com.rent-dashboard.daily` 已安裝（每天 08:00 跑 `tools/run-local.sh`）；首次完整本機執行在本 session 尾聲啟動，結果見 `logs/`。
+- T-010（FB 每日自動抽取）未開始。
 
 ## Next (ordered)
 
-1. 使用者同意後：`gh api -X PUT …/actions/permissions -f allowed_actions=all`、Pages Source = GitHub Actions；`gh workflow run scrape.yml`；確認網址可開。
+1. 確認 `logs/run-*.log` 首次 launchd 路徑成功（抓取 → publish → 發布 run success）。
 2. 使用者在登入 Chrome 對兩個社團跑 `tools/fb-extract.js`（459966811445588、305665579858865），貼進看板或交 agent 匯入。
 3. T-008 抽取補強：地標→行政區（天母→士林區）、插字步行距離、多房價取區間。
 4. T-004 抽出 `scrape.mjs` 的 core 純函式到 `core/` 並補測試（text-extract／fb-listing 已在 core/）。
