@@ -6,6 +6,22 @@ export const TAIPEI_DISTRICTS = ['中正區','大同區','中山區','松山區'
 // 新北常見地名：只用來判斷「不在台北市」，不做細分
 const NEW_TAIPEI = ['板橋','中和','永和','新店','三重','新莊','土城','蘆洲','汐止','淡水','樹林','泰山',
   '五股','林口','深坑','鶯歌','三峽','八里','石碇','瑞芳','新北'];
+// 地標／英文 → 行政區（T-008）。英文比對不分大小寫；地標只在沒寫「X區」時才用。
+export const DISTRICT_ALIASES = {
+  '中正區': ['zhongzheng', 'jhongjheng', '台大醫院', '公館', '古亭', '中正紀念堂', '台北車站', '善導寺'],
+  '大同區': ['datong', 'tatung', '迪化街', '大稻埕', '寧夏夜市', '圓山'],
+  '中山區': ['zhongshan', 'jhongshan', '行天宮', '中山國小', '民生社區(?!.*松山)', '大直', '林森北', '雙連', '松江南京'],
+  '松山區': ['songshan', 'sungshan', '小巨蛋', '民生社區', '南京三民', '饒河'],
+  '大安區': ["da'an", 'daan', "ta'an", '東區', '忠孝復興', '忠孝敦化', '師大', '永康街', '信義安和', '六張犁', '科技大樓'],
+  '萬華區': ['wanhua', 'wanhwa', '西門町', '龍山寺', '艋舺'],
+  '信義區': ['xinyi', 'hsinyi', '101', '市政府', '象山', '永春', '國父紀念館'],
+  '士林區': ['shilin', 'shihlin', '天母', '劍潭', '芝山', '士林夜市'],
+  '北投區': ['beitou', 'peitou', '石牌', '唭哩岸', '關渡', '奇岩', '明德'],
+  '內湖區': ['neihu', '西湖', '港墘', '文德', '大湖公園', '東湖', '葫洲'],
+  '南港區': ['nangang', '南軟', '昆陽', '後山埤', '南港展覽館'],
+  '文山區': ['wenshan', '木柵', '景美', '萬芳', '政大', '萬隆', '動物園'],
+};
+const EN_TAIPEI = /\btaipei\b/i;
 
 const FULLWIDTH = { '０':'0','１':'1','２':'2','３':'3','４':'4','５':'5','６':'6','７':'7','８':'8','９':'9',
   '，':',', '：':':', '／':'/', '｜':'|' };
@@ -24,18 +40,21 @@ const toInt = (s) => parseInt(String(s).replace(/,/g, ''), 10);
 /** 「1萬3」「1.3萬」「13,000」「NT$13000」「13000元」→ 13000；回 null 表示沒把握 */
 export function parseMoney(s) {
   if (!s) return null;
+  const k = String(s).match(/(\d+(?:\.\d+)?)\s*[kK]\b/);
+  if (k) return Math.round(parseFloat(k[1]) * 1000);
   const m = String(s).match(/(\d+(?:\.\d+)?)\s*萬\s*(\d)?(?!\d)/);
   if (m) return Math.round(parseFloat(m[1]) * 10000 + (m[2] ? parseInt(m[2], 10) * 1000 : 0));
   const n = String(s).match(/\d[\d,]*/);
   return n ? toInt(n[0]) : null;
 }
 
-const MONEY = String.raw`(?:NT\$|NTD|\$)?\s*(\d+(?:\.\d+)?\s*萬\s*\d?|\d{1,3}(?:,\d{3})+|\d{4,6})`;
+const MONEY = String.raw`(?:NT\$|NTD|TWD|\$)?\s*(\d+(?:\.\d+)?\s*萬\s*\d?|\d{1,3}(?:\.\d)?\s*[kK](?![a-z])|\d{1,3}(?:,\d{3})+|\d{4,6})`;
 
 function findPrice(t) {
   // 1) 有租金語境的優先：租金 13000、13000元/月、月租 1萬3
   const ctx = [
-    new RegExp(String.raw`(?:租金|月租|每月|月付)\s*[:：]?\s*${MONEY}`),
+    new RegExp(String.raw`(?:租金|月租|每月|月付|rent|price|monthly)\s*[:：]?\s*(?:is\s*)?${MONEY}`, 'i'),
+    new RegExp(String.raw`${MONEY}\s*(?:/|per)\s*(?:month|mo)`, 'i'),
     new RegExp(String.raw`${MONEY}\s*(?:元|塊)?\s*[/／]\s*月`),
     new RegExp(String.raw`${MONEY}\s*(?:元|塊)(?!\d)`),
   ];
@@ -59,7 +78,11 @@ function findDistrict(t) {
   const d = TAIPEI_DISTRICTS.find((x) => t.includes(x));
   if (d) return { district: d, outsideTaipei: false };
   const nt = NEW_TAIPEI.find((x) => new RegExp(x + '(?:區|市)?').test(t));
-  if (nt) return { district: null, outsideTaipei: true };
+  if (nt && !/台北市|Taipei City/i.test(t)) return { district: null, outsideTaipei: true };
+  for (const [dist, aliases] of Object.entries(DISTRICT_ALIASES)) {
+    if (aliases.some((a) => new RegExp(/^[a-z' ]+$/i.test(a) ? `\\b${a}\\b` : a, 'i').test(t))) return { district: dist, outsideTaipei: false };
+  }
+  if (EN_TAIPEI.test(t) || /台北/.test(t)) return { district: null, outsideTaipei: false };
   return { district: null, outsideTaipei: null };
 }
 
@@ -114,7 +137,7 @@ function findFloor(t) {
 /** 主入口：貼文本文 → 欄位。`mrtLines` 是 mrt-lines.json 的物件。 */
 export function extractListing(text, mrtLines) {
   const t = normalizeText(text);
-  const isSeeking = /#\s*求租|求租|徵室友|找室友/.test(t);
+  const isSeeking = /#\s*求租|求租|徵室友|找室友|looking for (?:a )?(?:room|apartment|flat|place)|seeking (?:a )?(?:room|apartment)/i.test(t);
   const { district, outsideTaipei } = findDistrict(t);
   const { stationDist, approx } = findStationDist(t);
   return {

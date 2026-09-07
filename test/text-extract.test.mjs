@@ -91,3 +91,16 @@ test('求租貼文', () => {
 test('normalizeText 清掉反爬字元與全形', () => {
   assert.equal(normalizeText('p͏r͏o͏ １３，０００'), 'pro 13,000');
 });
+
+test('T-008：地標與英文 → 行政區；英文價格；英文求租', () => {
+  assert.equal(ex('天母共居公寓 12000').district, '士林區');
+  assert.equal(ex('東區 套房 25000').district, '大安區');
+  assert.equal(ex("Cozy studio in Da'an, near Technology Building MRT, NT$25,000/month").district, '大安區');
+  assert.equal(ex("Cozy studio in Da'an, NT$25,000/month").price, 25000);
+  assert.equal(ex('Room in Xinyi, 18k per month').price, 18000);
+  assert.equal(ex('Room in Xinyi, 18k per month').district, '信義區');
+  assert.equal(ex('Apartment in Taipei, rent 30000').outsideTaipei, false);
+  assert.equal(ex('Looking for a room in Taipei').isSeeking, true);
+  assert.equal(ex('中和 近景安站 15000').outsideTaipei, true);
+  assert.equal(ex('沒有任何地點 15000').district, null);
+});

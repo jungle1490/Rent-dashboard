@@ -20,7 +20,7 @@ Tier legend: **low** = any model · **mid** = capable coding model · **TOP** = 
 - [x] **T-006** FB 社團貼文抽取：頁面內腳本 + `core/text-extract.mjs` + 測試 — mid/TOP（ADR-0002；2026-09-08 完成，`node --test` 10/10）
 - [x] **T-007** FB 房源進看板：合併 fb.json、貼上匯入、來源標示、未標欄位處理 — mid（2026-09-08 完成，22 項桌面斷言 + 手機斷言）
 
-- [ ] **T-008** 文字抽取補強：地標→行政區（天母→士林區、東區→大安區…）、插字的步行距離、多房價（「12000／14000／16000」取區間） — mid
+- [x] **T-008** 文字抽取補強：地標／英文→行政區、英文價格（NT$、k）、英文求租 — mid（2026-09-08；插字步行距離、多房價區間仍待做）
 
 - [x] **T-009** 抓取改到 Mac 排程 + 孤兒分支 data 發布（591 擋 Actions IP，ADR-0003）— mid（2026-09-08 完成：data 分支、發布 workflow 成功、launchd 每天 08:00）
 - [ ] **T-010** FB 每日自動抽取：AppleScript 驅動已登入的 Chrome 執行 fb-extract.js → fb-import → 併入 run-local.sh — mid
