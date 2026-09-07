@@ -84,6 +84,7 @@ select{width:100%;padding:6px 8px;border:1px solid var(--line);border-radius:7px
 .badge.new{background:var(--accent)}
 .badge.drop{background:var(--warn)}
 .badge.gone{background:#666}
+.badge.seen{background:rgba(0,0,0,.45);font-weight:500}
 .acts{position:absolute;top:8px;right:8px;display:flex;gap:5px}
 .acts button{width:29px;height:29px;border-radius:7px;border:0;background:rgba(0,0,0,.62);color:#fff;
   display:grid;place-items:center;font-size:14px;backdrop-filter:blur(4px);line-height:1}
@@ -103,6 +104,54 @@ select{width:100%;padding:6px 8px;border:1px solid var(--line);border-radius:7px
 .tagrow{display:flex;flex-wrap:wrap;gap:4px;margin-top:auto;padding-top:4px}
 .tg{font-size:10.5px;padding:2px 6px;border-radius:4px;background:var(--bg);color:var(--muted);border:1px solid var(--line)}
 .empty{padding:60px 20px;text-align:center;color:var(--muted)}
+.swbtn{padding:6px 12px;border:1px solid var(--accent);border-radius:8px;background:var(--accent-soft);
+  color:var(--accent);font-weight:600;font-size:12.5px}
+
+/* ---- 篩選抽屜：滑卡模式（或手機）時把側欄疊成全螢幕面板 ---- */
+aside.open{position:fixed;inset:0;z-index:55;max-height:none;max-width:560px;margin:0 auto;
+  border-radius:0;padding:14px 14px 20px;overflow-y:auto;box-shadow:0 0 0 100vmax rgba(0,0,0,.45)}
+.done{display:none}
+aside.open .done{display:block;position:sticky;bottom:0;width:100%;padding:13px;border:0;border-radius:10px;
+  background:var(--accent);color:#fff;font-weight:600;font-size:15px;margin-top:12px}
+
+/* ---- 滑卡模式 ---- */
+.sw{position:fixed;inset:0;z-index:45;background:var(--bg);display:flex;flex-direction:column}
+.sw .hd{display:flex;align-items:center;gap:8px;padding:10px 12px;border-bottom:1px solid var(--line);background:var(--panel)}
+.sw .hd .t{font-weight:600;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sw .hd .t small{color:var(--muted);font-weight:400;margin-left:6px}
+.sw .hd button{padding:6px 10px;border:1px solid var(--line);border-radius:8px;background:transparent;font-size:12.5px;white-space:nowrap}
+.sw .hd button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:#fff}
+.stage{flex:1;position:relative;display:flex;align-items:center;justify-content:center;padding:14px;overflow:hidden}
+.sc{position:absolute;width:min(92vw,440px);height:min(76vh,680px);border-radius:16px;overflow:hidden;
+  background:#111;box-shadow:0 14px 40px rgba(0,0,0,.35);touch-action:none;user-select:none;-webkit-user-select:none;will-change:transform}
+.sc.back{transform:scale(.95) translateY(12px);opacity:.6;pointer-events:none}
+.sc img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;-webkit-user-drag:none}
+.sc .dots{position:absolute;top:10px;left:12px;right:12px;display:flex;gap:4px;z-index:2}
+.sc .dots i{flex:1;height:3px;border-radius:2px;background:rgba(255,255,255,.35)}
+.sc .dots i.on{background:#fff}
+.sc .nb{position:absolute;top:22px;left:12px;z-index:3;font-size:11px;font-weight:600;padding:2.5px 7px;border-radius:5px;background:var(--accent);color:#fff}
+.sc .info{position:absolute;left:0;right:0;bottom:0;padding:70px 16px 16px;color:#fff;z-index:2;
+  background:linear-gradient(transparent,rgba(0,0,0,.85))}
+.sc .info .p{font-size:26px;font-weight:700}
+.sc .info .p small{font-size:12px;font-weight:400;opacity:.8;margin-left:4px}
+.sc .info .f{font-size:12.5px;opacity:.9;margin-top:2px}
+.sc .info .tt{font-size:14px;font-weight:500;margin-top:6px;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.sc .info .m{font-size:12px;opacity:.85;margin-top:4px}
+.sc .stamp{position:absolute;top:44px;padding:6px 14px;border:3px solid;border-radius:8px;font-size:22px;font-weight:800;
+  letter-spacing:.1em;z-index:3;opacity:0;pointer-events:none}
+.sc .stamp.like{right:22px;color:#4ade80;border-color:#4ade80;transform:rotate(14deg)}
+.sc .stamp.nope{left:22px;color:#f87171;border-color:#f87171;transform:rotate(-14deg)}
+.sc .det{position:absolute;right:12px;bottom:12px;z-index:3;padding:6px 12px;border:1px solid rgba(255,255,255,.5);
+  border-radius:8px;background:rgba(0,0,0,.45);color:#fff;font-size:12.5px;backdrop-filter:blur(4px)}
+.swacts{display:flex;justify-content:center;align-items:center;gap:18px;padding:12px 12px calc(16px + env(safe-area-inset-bottom));
+  background:var(--panel);border-top:1px solid var(--line)}
+.swacts button{width:58px;height:58px;border-radius:50%;border:2px solid var(--line);background:var(--panel);font-size:22px;display:grid;place-items:center}
+.swacts .no{color:#f87171;border-color:#f87171}
+.swacts .yes{color:var(--star);border-color:var(--star)}
+.swacts .un{width:46px;height:46px;font-size:16px;color:var(--muted)}
+.swacts button:disabled{opacity:.35}
+.swempty{text-align:center;color:var(--muted);padding:40px 24px;max-width:360px;line-height:1.7}
+.swempty b{display:block;font-size:18px;color:var(--ink);margin-bottom:8px}
 
 /* ---- 詳細面板 ---- */
 .ov{position:fixed;inset:0;z-index:50;background:rgba(0,0,0,.55);backdrop-filter:blur(3px);
@@ -215,6 +264,7 @@ select{width:100%;padding:6px 8px;border:1px solid var(--line);border-radius:7px
     </div>
 
     <button class="reset" id="resetAll">重設所有條件</button>
+    <button class="done" id="filtDone">完成</button>
   </aside>
 
   <main>
@@ -223,9 +273,11 @@ select{width:100%;padding:6px 8px;border:1px solid var(--line);border-radius:7px
       <div class="tabs" id="viewTabs">
         <button data-view="active" aria-selected="true">全部</button>
         <button data-view="saved" aria-selected="false">收藏</button>
+        <button data-view="unseen" aria-selected="false">未看過</button>
         <button data-view="hidden" aria-selected="false">已排除</button>
       </div>
       <div class="spacer"></div>
+      <button class="swbtn" id="swOpen">⚡ 滑卡</button>
       <select id="sort">
         <option value="new">最新上架</option>
         <option value="priceAsc">租金 低→高</option>
@@ -243,6 +295,8 @@ select{width:100%;padding:6px 8px;border:1px solid var(--line);border-radius:7px
 const LS = {
   saved:  new Set(JSON.parse(localStorage.getItem('rent591.saved')  || '[]')),
   hidden: new Set(JSON.parse(localStorage.getItem('rent591.hidden') || '[]')),
+  // 「已看」與「排除」是兩回事：已看只是滑過／開過，在「全部」裡仍要顯示
+  seen:   new Set(JSON.parse(localStorage.getItem('rent591.seen')   || '[]')),
 };
 const persist = (k) => localStorage.setItem('rent591.' + k, JSON.stringify([...LS[k]]));
 
@@ -410,6 +464,7 @@ function card(l) {
   const badges = [];
   if (l.gone) badges.push('<span class="badge gone">已下架</span>');
   else if (isNew(l)) badges.push('<span class="badge new">新上架</span>');
+  if (LS.seen.has(l.id)) badges.push('<span class="badge seen">已看</span>');
   if (l.prevPrice && l.prevPrice > l.price)
     badges.push(`<span class="badge drop">↓ ${(l.prevPrice - l.price).toLocaleString()}</span>`);
 
@@ -455,31 +510,35 @@ function card(l) {
     });
   }
   el.querySelector('[data-act=save]').onclick = () => {
-    LS.saved.has(l.id) ? LS.saved.delete(l.id) : LS.saved.add(l.id); persist('saved'); render();
+    LS.saved.has(l.id) ? LS.saved.delete(l.id) : LS.saved.add(l.id); persist('saved'); render(true);
   };
   el.querySelector('[data-act=hide]').onclick = () => {
-    LS.hidden.has(l.id) ? LS.hidden.delete(l.id) : LS.hidden.add(l.id); persist('hidden'); render();
+    LS.hidden.has(l.id) ? LS.hidden.delete(l.id) : LS.hidden.add(l.id); persist('hidden'); render(true);
   };
   return el;
 }
 const escapeHtml = (s) => String(s ?? '').replace(/[&<>"']/g,
   (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
-function render() {
+let lastShown = 0;   // 上次展開到第幾筆；render(true) 會保留，免得收藏一下清單就跳回前 60 筆
+function render(keep = false) {
   saveF();
   renderFilters();
   let list = DATA.listings.filter(matches);
   if (F.view === 'saved')       list = list.filter((l) => LS.saved.has(l.id));
   else if (F.view === 'hidden') list = list.filter((l) => LS.hidden.has(l.id));
+  else if (F.view === 'unseen') list = list.filter((l) => !LS.hidden.has(l.id) && !LS.seen.has(l.id));
   else                          list = list.filter((l) => !LS.hidden.has(l.id));
   list.sort(SORTS[F.sort]);
   // 新上架與收藏永遠排前面（依「最新上架」排序時）
   if (F.sort === 'new') list.sort((a, b) => (isNew(b) - isNew(a)));
 
   const newCount = list.filter(isNew).length;
+  const unseenTotal = DATA.listings.filter((l) => !l.gone && !LS.hidden.has(l.id) && !LS.seen.has(l.id)).length;
   $('#count').innerHTML = `<b>${list.length}</b> 筆` +
     (newCount ? `　·　<span style="color:var(--accent)">${newCount} 筆新上架</span>` : '') +
-    `　·　收藏 ${LS.saved.size}　排除 ${LS.hidden.size}`;
+    `　·　收藏 ${LS.saved.size}　排除 ${LS.hidden.size}　未看 ${unseenTotal}`;
+  if (SW.open) swDraw();   // 滑卡開著時佇列跟著篩選變
 
   const out = $('#out'); out.innerHTML = '';
   if (!list.length) {
@@ -491,14 +550,16 @@ function render() {
   out.append(grid);
   let shown = 0;
   const PAGE = 60;
+  const initial = keep ? Math.max(PAGE, lastShown) : PAGE;
   const moreBtn = document.createElement('button');
   moreBtn.className = 'more';
   const showMore = () => {
-    const slice = list.slice(shown, shown + PAGE);
+    const slice = list.slice(shown, shown + (shown === 0 ? initial : PAGE));
     const frag = document.createDocumentFragment();
     for (const l of slice) frag.append(card(l));
     grid.append(frag);
     shown += slice.length;
+    lastShown = shown;
     if (shown >= list.length) { moreBtn.remove(); io.disconnect(); }
     else moreBtn.textContent = `載入更多（還有 ${list.length - shown} 筆）`;
   };
@@ -516,7 +577,10 @@ let BY_ID = new Map();
 let galIdx = 0, galPhotos = [];
 
 function openDetail(l) {
-  history.pushState({ detail: l.id }, '', '#p' + l.id);
+  history.pushState({ detail: l.id, swipe: SW.open ? 1 : 0 }, '', '#p' + l.id);
+  // 從看板開面板算「已看」；從滑卡開不算——已看由滑的方向決定，
+  // 否則 render() 重算佇列，面板底下那張卡會消失
+  if (!SW.open && !LS.seen.has(l.id)) { LS.seen.add(l.id); persist('seen'); render(true); }
   showDetail(l);
 }
 function showDetail(l) {
@@ -540,19 +604,35 @@ function closeDetail() {
 }
 function hideDetail() {
   document.querySelector('.ov')?.remove();
-  document.body.style.overflow = '';
+  document.body.style.overflow = SW.open ? 'hidden' : '';
 }
+// popstate 是唯一移除覆蓋層 DOM 的地方：state 裡有什麼就開什麼，沒有就關
 window.addEventListener('popstate', (e) => {
-  const id = e.state && e.state.detail;
-  if (!id) return hideDetail();
-  const l = BY_ID.get(id);
+  const st = e.state || {};
+  if (st.swipe) { if (!SW.open) swShow(); } else if (SW.open) swHide();
+  const l = st.detail && BY_ID.get(st.detail);
   l ? showDetail(l) : hideDetail();
 });
 document.addEventListener('keydown', (e) => {
-  if (!document.querySelector('.ov')) return;
-  if (e.key === 'Escape') closeDetail();
-  if (e.key === 'ArrowRight') gal(1);
-  if (e.key === 'ArrowLeft') gal(-1);
+  if (e.target.matches('input, select, textarea')) return;
+  if (document.querySelector('.ov')) {          // 面板在最上層
+    if (e.key === 'Escape') closeDetail();
+    if (e.key === 'ArrowRight') gal(1);
+    if (e.key === 'ArrowLeft') gal(-1);
+    return;
+  }
+  if (document.querySelector('aside.open')) {   // 篩選抽屜
+    if (e.key === 'Escape') closeFilters();
+    return;
+  }
+  if (SW.open) {
+    const front = document.querySelector('.sc.front');
+    const cur = front && BY_ID.get(+front.dataset.id);
+    if (e.key === 'Escape') swClose();
+    else if (e.key === 'ArrowRight' && cur) swFly(front, 1, () => swCommit(cur, 'yes'));
+    else if (e.key === 'ArrowLeft'  && cur) swFly(front, -1, () => swCommit(cur, 'no'));
+    else if (e.key === 'Backspace' || e.key === 'z') { e.preventDefault(); swUndo(); }
+  }
 });
 
 function gal(d) {
@@ -623,19 +703,172 @@ function wireDetail(ov, l) {
     persist('saved');
     const on = LS.saved.has(l.id);
     sv.classList.toggle('on', on); sv.textContent = on ? '★ 已收藏' : '☆ 收藏';
-    render();   // 只重畫背後的清單，面板和相簿位置保持不動
+    render(true);   // 只重畫背後的清單，面板和相簿位置保持不動
   };
   const hd = ov.querySelector('[data-act=hide]');
   hd.onclick = () => {
     LS.hidden.has(l.id) ? LS.hidden.delete(l.id) : LS.hidden.add(l.id);
     persist('hidden');
     hd.textContent = LS.hidden.has(l.id) ? '↺ 取消排除' : '✕ 排除這筆';
-    render();
+    render(true);
   };
+}
+
+/* ---------- 篩選抽屜 ---------- */
+function openFilters()  { $('#filters').classList.add('open'); }
+function closeFilters() { $('#filters').classList.remove('open'); }
+
+/* ---------- 滑卡模式 ----------
+   佇列永遠是「未看 ∩ 目前篩選 ∩ 未排除 ∩ 未下架」，每次重畫都重算；
+   滑過就標已看，自然掉出佇列。返回時把那張硬放回最前面（SW.force）。      */
+const SW = { open: false, onlyNew: true, hist: [], force: null, photo: 0 };
+
+function swQueue() {
+  let q = DATA.listings.filter((l) => !l.gone && !LS.hidden.has(l.id) && !LS.seen.has(l.id) && matches(l));
+  if (SW.onlyNew) q = q.filter(isNew);
+  return q.sort((a, b) => new Date(b.firstSeen) - new Date(a.firstSeen));
+}
+function swOpen() { history.pushState({ swipe: 1 }, '', '#swipe'); swShow(); }
+function swShow() {
+  SW.open = true; SW.hist = []; SW.force = null; SW.photo = 0;
+  SW.onlyNew = NEW_MEANINGFUL;   // 首輪資料全是「新」，那個開關沒意義，就先關
+  if (!document.querySelector('.sw')) {
+    const el = document.createElement('div'); el.className = 'sw'; document.body.append(el);
+  }
+  document.body.style.overflow = 'hidden';
+  swDraw();
+}
+function swClose() { if (history.state && history.state.swipe) history.back(); else swHide(); }
+function swHide() {
+  SW.open = false;
+  document.querySelector('.sw')?.remove();
+  document.body.style.overflow = document.querySelector('.ov') ? 'hidden' : '';
+}
+
+function swPhotos(l) { return (l.photos && l.photos.length ? l.photos : [l.cover]).filter(Boolean); }
+
+function swDraw() {
+  const el = document.querySelector('.sw'); if (!el) return;
+  const q = swQueue();
+  const cur = SW.force && !LS.seen.has(SW.force.id) ? SW.force : q[0];
+  const next = q.find((l) => l !== cur);
+  const empty = SW.onlyNew
+    ? '關掉「只看新上架」可以繼續滑其他沒看過的'
+    : '等下一輪抓取，或到「篩選」放寬條件';
+  el.innerHTML = `
+    <div class="hd">
+      <button data-swx title="關閉（Esc 或上一頁）">✕</button>
+      <div class="t">滑卡<small>剩 ${q.length} 筆</small></div>
+      <button data-swnew aria-pressed="${SW.onlyNew}">只看新上架</button>
+      <button data-swfilt>篩選</button>
+    </div>
+    <div class="stage">
+      ${next ? swCard(next, 'back') : ''}
+      ${cur ? swCard(cur, 'front')
+            : `<div class="swempty"><b>都看完了</b>${empty}<br><br>左滑跳過的物件在看板「全部」裡都還在</div>`}
+    </div>
+    <div class="swacts">
+      <button class="no"  data-sw="no"   ${cur ? '' : 'disabled'} title="跳過（←）">✕</button>
+      <button class="un"  data-sw="undo" ${SW.hist.length ? '' : 'disabled'} title="返回上一張（Backspace）">↩</button>
+      <button class="yes" data-sw="yes"  ${cur ? '' : 'disabled'} title="收藏（→）">★</button>
+    </div>`;
+  el.querySelector('[data-swx]').onclick = swClose;
+  el.querySelector('[data-swnew]').onclick = () => { SW.onlyNew = !SW.onlyNew; SW.force = null; SW.photo = 0; swDraw(); };
+  el.querySelector('[data-swfilt]').onclick = openFilters;
+  el.querySelector('[data-sw=undo]').onclick = swUndo;
+  const front = el.querySelector('.sc.front');
+  el.querySelector('[data-sw=no]').onclick  = () => cur && swFly(front, -1, () => swCommit(cur, 'no'));
+  el.querySelector('[data-sw=yes]').onclick = () => cur && swFly(front,  1, () => swCommit(cur, 'yes'));
+  if (cur) swGesture(front, cur);
+}
+
+function swCard(l, pos) {
+  const ph = swPhotos(l);
+  const idx = pos === 'front' ? Math.min(SW.photo, ph.length - 1) : 0;
+  const inc = (l.contains || []).map((c) => CONTAIN_LABEL[c] || c);
+  const feeLine = l.extraFee > 0 ? `＋額外費用 ${l.extraFee.toLocaleString()}／月（合計約 ${(l.price + l.extraFee).toLocaleString()}）`
+                : inc.length ? `租金含 ${inc.join('、')}` : '';
+  return `<div class="sc ${pos}" data-id="${l.id}">
+    <img src="${ph[idx] || ''}" alt="" draggable="false">
+    <div class="dots">${ph.map((_, i) => `<i class="${i === idx ? 'on' : ''}"></i>`).join('')}</div>
+    ${isNew(l) ? '<span class="nb">新上架</span>' : ''}
+    <div class="stamp like">收藏</div><div class="stamp nope">跳過</div>
+    <div class="info">
+      <div class="p">${l.price.toLocaleString()}<small>元/月</small></div>
+      ${feeLine ? `<div class="f">${feeLine}</div>` : ''}
+      <div class="tt">${escapeHtml(l.title)}</div>
+      <div class="m">${l.district}　${l.kind}　${l.layout || ''}　${l.area} 坪　${l.floor}</div>
+      <div class="m">${l.station ? `🚇 ${l.station} ${l.stationDist ?? '?'}m　${l.lines.join('／')}` : '非捷運周邊'}</div>
+    </div>
+    <button class="det" data-det>詳細 ›</button>
+  </div>`;
+}
+
+function swGesture(card, l) {
+  const ph = swPhotos(l);
+  const like = card.querySelector('.stamp.like'), nope = card.querySelector('.stamp.nope');
+  let sx = 0, sy = 0, dx = 0, dy = 0, dragging = false, moved = false;
+  card.querySelector('[data-det]').addEventListener('click', (e) => { e.stopPropagation(); openDetail(l); });
+  card.addEventListener('pointerdown', (e) => {
+    if (e.target.closest('[data-det]')) return;
+    dragging = true; moved = false; sx = e.clientX; sy = e.clientY; dx = dy = 0;
+    try { card.setPointerCapture(e.pointerId); } catch { /* 合成事件或已釋放的 pointer 沒得 capture，不影響拖曳 */ }
+    card.style.transition = 'none';
+  });
+  card.addEventListener('pointermove', (e) => {
+    if (!dragging) return;
+    dx = e.clientX - sx; dy = e.clientY - sy;
+    if (Math.abs(dx) > 6 || Math.abs(dy) > 6) moved = true;
+    card.style.transform = `translate(${dx}px, ${dy * 0.4}px) rotate(${dx / 18}deg)`;
+    like.style.opacity = Math.min(1, Math.max(0, dx / 90));
+    nope.style.opacity = Math.min(1, Math.max(0, -dx / 90));
+  });
+  const end = (e) => {
+    if (!dragging) return; dragging = false;
+    if (!moved) {   // 只是點一下：左半邊上一張照片、右半邊下一張
+      if (ph.length < 2) return;
+      const r = card.getBoundingClientRect();
+      SW.photo = (SW.photo + ((e.clientX - r.left) < r.width / 2 ? -1 : 1) + ph.length) % ph.length;
+      card.querySelector('img').src = ph[SW.photo];
+      card.querySelectorAll('.dots i').forEach((d, i) => d.classList.toggle('on', i === SW.photo));
+      return;
+    }
+    const TH = 110;
+    if (dx > TH)       swFly(card,  1, () => swCommit(l, 'yes'));
+    else if (dx < -TH) swFly(card, -1, () => swCommit(l, 'no'));
+    else { card.style.transition = 'transform .25s'; card.style.transform = ''; like.style.opacity = nope.style.opacity = 0; }
+  };
+  card.addEventListener('pointerup', end);
+  card.addEventListener('pointercancel', end);
+}
+function swFly(card, dir, done) {
+  if (!card) return done();
+  card.style.transition = 'transform .3s ease-in, opacity .3s';
+  card.style.transform = `translate(${dir * 120}vw, -20px) rotate(${dir * 25}deg)`;
+  card.style.opacity = '0';
+  setTimeout(done, 260);
+}
+function swCommit(l, act) {
+  if (!l || LS.seen.has(l.id)) return;   // 防連點：同一張只處理一次
+  const wasSaved = LS.saved.has(l.id);
+  if (act === 'yes' && !wasSaved) { LS.saved.add(l.id); persist('saved'); }
+  LS.seen.add(l.id); persist('seen');
+  SW.hist.push({ l, act, wasSaved });
+  SW.force = null; SW.photo = 0;
+  render(true);   // 會順便 swDraw()
+}
+function swUndo() {
+  const h = SW.hist.pop(); if (!h) return;
+  LS.seen.delete(h.l.id); persist('seen');
+  if (h.act === 'yes' && !h.wasSaved) { LS.saved.delete(h.l.id); persist('saved'); }
+  SW.force = h.l; SW.photo = 0;
+  render(true);
 }
 
 /* ---------- 事件 ---------- */
 function bind() {
+  $('#swOpen').onclick = swOpen;
+  $('#filtDone').onclick = closeFilters;
   $('#dist').oninput = (e) => { F.dist = +e.target.value; render(); };
   for (const [id, key] of [['#pMin','pMin'],['#pMax','pMax'],['#aMin','aMin'],['#aMax','aMax']]) {
     $(id).oninput = (e) => { F[key] = e.target.value === '' ? null : +e.target.value; render(); };
@@ -690,6 +923,7 @@ let DISTRICTS = [], DISTRICT_COUNT = {}, STATION_COUNT = {}, TAG_COUNT = {},
   // 網址帶 #p<id> 時直接開該筆（分享連結、重新整理都能回到原本看的物件）
   const m = location.hash.match(/^#p(\d+)$/);
   if (m && BY_ID.has(+m[1])) { history.replaceState({ detail: +m[1] }, '', location.hash); showDetail(BY_ID.get(+m[1])); }
+  else if (location.hash === '#swipe') { history.replaceState({ swipe: 1 }, '', '#swipe'); swShow(); }
 })();
 </script>
 </body>

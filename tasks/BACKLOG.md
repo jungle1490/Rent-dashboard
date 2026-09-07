@@ -5,7 +5,7 @@ Tier legend: **low** = any model · **mid** = capable coding model · **TOP** = 
 ## M1 (MVP)
 
 - [x] **T-000** 抓取、看板、Actions 部署、詳細面板（init 前已完成，見 STATE.md）
-- [ ] **T-001** 滑卡模式 + 已看追蹤 — mid
+- [x] **T-001** 滑卡模式 + 已看追蹤 — mid（2026-09-08 完成，卡片 tasks/T-001-swipe-mode.md）
       只限新上架＋未看過（可切換）、套用目前篩選、右滑收藏、左滑跳過（仍在「全部」可見）、返回上一張、
       點卡片切照片、「詳細」開面板；鍵盤 ←／→／Backspace；`rent591.seen`；看板加「未看過」分頁與「已看」徽章
 - [ ] **T-002** 手機版適配 — mid
@@ -13,7 +13,8 @@ Tier legend: **low** = any model · **mid** = capable coding model · **TOP** = 
 - [ ] **T-003** 推上 GitHub — low
       合併遠端 initial commit（README 以本地為準）、push、Settings → Pages → Source = GitHub Actions、手動跑第一次、確認網址
 - [ ] **T-004** 抽出 `core/` + 測試 — **TOP**
-      把 `normalize`、`resolveStation`、`parseContains` 移到 `core/`，`node --test` 覆蓋：站名 8 種寫法、費用拆解、價格逗號、gone 保留 7 天、<50% 中止
+      把 `normalize`、`resolveStation`、`parseContains` 移到 `core/`，`node --test` 覆蓋：站名 8 種寫法、費用拆解、價格逗號、gone 保留 7 天、<50% 中止。
+      同時把前端純邏輯（`matches`、`swQueue`、undo 語意）抽成可 import 的模組補測試——T-001 目前只有瀏覽器內斷言
 - [ ] **T-005** ADR-0001 補完 alternatives 與 revisit trigger — low
 
 ## Later

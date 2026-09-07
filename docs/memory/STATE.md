@@ -20,12 +20,12 @@ _Last rewritten: 2026-09-08 by init-project skill（專案已有可運作的程�
 ## In progress
 
 - 引進 agent framework（本次）：網頁資產由 `docs/` 移到 `site/`，`docs/` 讓給框架文件。
-- 使用者提出三項需求，尚未實作：(1) 流程以看照片為主 (2) 手機版適配 (3) Tinder 式滑卡（只限新上架＋未看過、可設篩選、右滑收藏、可返回、跳過的在「全部」仍可見）。
+- T-001 滑卡模式 **完成**（VERIFIED，27 項瀏覽器斷言全 true）：`rent591.seen`、佇列＝未看∩篩選∩未排除、左滑只標已看、右滑收藏、undo、pushState、篩選抽屜即時更新、看板「未看過」分頁與「已看」徽章。
+- 尚未實作：(2) 手機版適配 T-002（篩選抽屜 `aside.open` 已有，缺底部工具列與單欄）；(3) T-003 推 GitHub。
 
 ## Next (ordered)
 
-1. T-001 滑卡模式 + `rent591.seen` 已看追蹤（tasks/BACKLOG.md）。
-2. T-002 手機版：篩選收成抽屜、底部工具列、卡片單欄。
-3. T-003 合併遠端 README、推送、設定 Pages Source = GitHub Actions、手動跑第一次。
-4. T-004 把 core 純函式抽成 `core/` 並用 `node --test` 補測試（站名解析、費用拆解、normalize）。
-5. 視需求：收藏／排除跨裝置同步（目前只在瀏覽器本機）。
+1. T-002 手機版：篩選收成抽屜、底部工具列、卡片單欄。
+2. T-003 合併遠端 README、推送、設定 Pages Source = GitHub Actions、手動跑第一次。
+3. T-004 把 core 純函式抽成 `core/` 並用 `node --test` 補測試（站名解析、費用拆解、normalize）。
+4. 視需求：收藏／排除跨裝置同步（目前只在瀏覽器本機）。

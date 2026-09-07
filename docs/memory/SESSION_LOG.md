@@ -7,4 +7,5 @@
 - 建 scraper、UI、Actions 工作流程、keepalive；三輪抓取驗證新上架／已下架比對正確。
 - 加詳細面板（pushState／上一頁關閉）、租金總額計價。
 - 執行 init-project：`docs/` 改為框架文件目錄，網頁資產移到 `site/`。
-- 待辦：滑卡模式、手機版、推送 GitHub（見 STATE.md）。
+- T-001 滑卡模式完成並驗收（實作細節見卡片）；已知限制：前端邏輯無單元測試，記入 T-004。
+- 待辦：T-002 手機版、T-003 推送 GitHub（見 STATE.md）。
