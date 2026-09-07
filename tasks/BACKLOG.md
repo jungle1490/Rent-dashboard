@@ -10,7 +10,7 @@ Tier legend: **low** = any model · **mid** = capable coding model · **TOP** = 
       點卡片切照片、「詳細」開面板；鍵盤 ←／→／Backspace；`rent591.seen`；看板加「未看過」分頁與「已看」徽章
 - [x] **T-002** 手機版適配 — mid（2026-09-08 完成，卡片 tasks/T-002-mobile.md）
       篩選收成全螢幕抽屜（有「完成」鈕）、底部工具列（篩選／滑卡）、卡片單欄、safe-area
-- [ ] **T-003** 推上 GitHub — low
+- [~] **T-003** 推上 GitHub — low（2026-09-08 已推送 `1df2058`；剩使用者設 Pages Source=GitHub Actions 並手動跑第一次）
       合併遠端 initial commit（README 以本地為準）、push、Settings → Pages → Source = GitHub Actions、手動跑第一次、確認網址
 - [ ] **T-004** 抽出 `core/` + 測試 — **TOP**
       把 `normalize`、`resolveStation`、`parseContains` 移到 `core/`，`node --test` 覆蓋：站名 8 種寫法、費用拆解、價格逗號、gone 保留 7 天、<50% 中止。

@@ -22,7 +22,8 @@ _Last rewritten: 2026-09-08 by init-project skill（專案已有可運作的程�
 - 引進 agent framework（本次）：網頁資產由 `docs/` 移到 `site/`，`docs/` 讓給框架文件。
 - T-001 滑卡模式 **完成**（VERIFIED，27 項瀏覽器斷言全 true）：`rent591.seen`、佇列＝未看∩篩選∩未排除、左滑只標已看、右滑收藏、undo、pushState、篩選抽屜即時更新、看板「未看過」分頁與「已看」徽章。
 - T-002 手機版 **完成**（VERIFIED，375×667 與 1280×800 兩組斷言全 true）：≤900px 側欄收成抽屜、底部工具列（篩選／滑卡）、≤600px 單欄、無橫向捲動、滑卡不裁切、safe-area。
-- T-003 推 GitHub **卡在憑證**：遠端已 merge 進本地（`1d8994f`），但這台機器沒有 GitHub HTTPS 憑證也沒有 SSH 金鑰，agent 不能代輸入帳密。需使用者 `gh auth login` 或自行 `git push`。
+- T-003 **已推送**（`1df2058`，遠端 SHA 一致，VERIFIED）。剩使用者在 GitHub 網頁：Settings → Pages → Source = GitHub Actions；Actions 手動跑第一次。網址 https://jungle1490.github.io/Rent-dashboard/
+- FB 社團房源（使用者堅持要）：VERIFIED 未登入 curl 回 HTTP 400 錯誤頁，雲端不可行。改走「使用者登入的瀏覽器」半自動路線，評估中。
 
 ## Next (ordered)
 
