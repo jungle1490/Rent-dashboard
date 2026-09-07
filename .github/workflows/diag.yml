@@ -1,0 +1,19 @@
+name: 診斷 591 連線
+on: { workflow_dispatch: {} }
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 探測
+        run: |
+          UA='Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36'
+          for u in "https://rent.591.com.tw/" "https://rent.591.com.tw/list?region=1&kind=1&page=1" "https://www.591.com.tw/"; do
+            echo "=== $u"
+            curl -sS -o body.txt -D head.txt -w "status=%{http_code} ip=%{remote_ip} time=%{time_total}\n" \
+              -H "User-Agent: $UA" -H "Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8" \
+              -H "Accept-Language: zh-TW,zh;q=0.9,en;q=0.8" -H "Sec-Fetch-Dest: document" -H "Sec-Fetch-Mode: navigate" \
+              -H "Sec-Fetch-Site: none" -H "Upgrade-Insecure-Requests: 1" "$u" || true
+            grep -iE "^(server|cf-ray|cf-mitigated|x-cache|via|set-cookie|content-type):" head.txt | head -8
+            echo "--- body head ---"; head -c 400 body.txt | tr '\n' ' '; echo
+          done
+          echo "=== runner egress"; curl -s https://api.ipify.org; echo
