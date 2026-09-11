@@ -144,14 +144,15 @@ async function scrapeQuery(q) {
 
   for (let p = 2; p <= pages; p++) {
     await sleep(cfg.delayMs ?? 800);
-    try {
-      const { items } = await fetchPage(q.query, p);
-      if (!items.length) break;
-      for (const it of items) listings.set(it.id, it);
-      if (p % 10 === 0) console.log(`    ...第 ${p}/${pages} 頁（累計 ${listings.size} 筆）`);
-    } catch (e) {
-      console.warn(`    ! 第 ${p} 頁失敗，略過：${e.message}`);
+    let items = null;
+    for (let attempt = 1; attempt <= 3 && !items; attempt++) {   // 零星 fetch failed 是暫時性的，重試而不是略過
+      try { items = (await fetchPage(q.query, p)).items; }
+      catch (e) { if (attempt === 3) console.warn(`    ! 第 ${p} 頁三次都失敗，略過：${e.message}`); else await sleep(2000 * attempt); }
     }
+    if (!items) continue;
+    if (!items.length) break;
+    for (const it of items) listings.set(it.id, it);
+    if (p % 10 === 0) console.log(`    ...第 ${p}/${pages} 頁（累計 ${listings.size} 筆）`);
   }
   return listings;
 }
