@@ -249,6 +249,7 @@ aside.open .done{display:block;position:sticky;bottom:0;width:100%;padding:13px;
       <div class="chips" style="margin-top:6px">
         <button class="chip sub" id="hideUnk">隱藏未標欄位的物件</button>
         <button class="chip sub" id="showSeek">顯示求租／售屋貼文</button>
+        <button class="chip sub" id="showGone">顯示已下架</button>
       </div>
     </div>
 
@@ -361,7 +362,7 @@ const persist = (k) => localStorage.setItem('rent591.' + k, JSON.stringify([...L
 const F = {  // 目前篩選狀態
   lines:new Set(), stations:new Set(), districts:new Set(), layouts:new Set(),
   kinds:new Set(), tags:new Set(), contains:new Set(), sources:new Set(), role:'all', fee:'all', basis:'rent', dist:2000,
-  hideUnknown:false, showSeeking:false,
+  hideUnknown:false, showSeeking:false, showGone:false,
   pMin:null, pMax:null, aMin:null, aMax:null, view:'active', sort:'new',
 };
 const SAVED_F = 'rent591.filters';
@@ -401,6 +402,7 @@ const unk = (l, v) => l.source === 'fb' && (v == null || v === '');
 function matches(l) {
   if (F.sources.size && !F.sources.has(l.source || '591')) return false;
   if ((l.isSeeking || l.isSale) && !F.showSeeking) return false;
+  if (l.gone && !F.showGone && F.view !== 'saved') return false;   // 已下架預設不顯示；收藏分頁仍保留（標「已下架」）
   if (F.hideUnknown && l.source === 'fb' && (l.price == null || !l.district)) return false;
   if (F.lines.size) {
     if (unk(l, l.station)) { /* 不知道站，放行 */ }
@@ -510,6 +512,8 @@ function renderFilters() {
   }
   $('#hideUnk').setAttribute('aria-pressed', String(F.hideUnknown));
   $('#hideUnk').onclick = () => { F.hideUnknown = !F.hideUnknown; render(); };
+  $('#showGone').setAttribute('aria-pressed', String(F.showGone));
+  $('#showGone').onclick = () => { F.showGone = !F.showGone; render(); };
   $('#showSeek').setAttribute('aria-pressed', String(F.showSeeking));
   $('#showSeek').onclick = () => { F.showSeeking = !F.showSeeking; render(); };
   const cc = $('#containChips'); cc.innerHTML = '';
@@ -1035,7 +1039,7 @@ function bind() {
   $('#resetAll').onclick = () => {
     Object.assign(F, {lines:new Set(),stations:new Set(),districts:new Set(),layouts:new Set(),
       kinds:new Set(),tags:new Set(),contains:new Set(),sources:new Set(),role:'all',fee:'all',basis:'rent',dist:2000,
-      hideUnknown:false,showSeeking:false,pMin:null,pMax:null,aMin:null,aMax:null});
+      hideUnknown:false,showSeeking:false,showGone:false,pMin:null,pMax:null,aMin:null,aMax:null});
     render();
   };
 }
