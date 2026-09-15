@@ -8,3 +8,6 @@
 | 推了 `data` 分支但沒有發布 run | 孤兒分支沒有 `.github/workflows`，GitHub 只為含 workflow 檔的 ref 觸發 | `publish.sh` 推完 `gh workflow run scrape.yml --ref main` | 2026-09-08 首次 run-local：data 更新但無 data 分支的 run |
 | 想讓網頁直接打 591 BFF API | 正式 GET 只對 `*.591.com.tw` 的 Origin 回 `Access-Control-Allow-Origin`（預檢會反射任意 Origin，但瀏覽器看正式回應）；且 bff-house 同樣在 CloudFront 後，機房 IP 403 | 放棄；API 只給台灣機器上的程式用（T-012） | 2026-09-08 本機 A/B/C/D 探測 + Actions run 34151453493 |
 | 本機抓取成功但 `publish.sh` 推 data 分支失敗：`RPC failed; HTTP 400 curl 22` | data.json 長到 ~9MB，git HTTPS 推送撞到 `http.postBuffer` 預設值 | `git -c http.postBuffer=524288000 push …`（publish.sh 已內建）；抓取頁面失敗改重試 3 次，減少被誤標下架的物件膨脹檔案 | 2026-09-09～11 三天 logs/run-*.log |
+| 兩次執行撞在一起，推 data 分支被拒 `cannot lock ref` | 每日排程與 5 分鐘輪詢同時跑，或 Mac 睡著讓一次執行拖到隔天 | run-local.sh 加 mkdir 鎖 + `caffeinate -i`；publish 推送重試 3 次 | 2026-09-14 logs |
+| 推成功但沒發布 | `gh workflow run` 對 api.github.com 逾時 | publish.sh 觸發重試 3 次 | 2026-09-13 logs |
+| data.json 長到 8.7MB、近半是已下架 | 抓到一半睡著 → 沒抓到的被標下架；下架保留 7 天含相簿 | 保留改 3 天、下架不留相簿；caffeinate 防中斷 | 2026-09-14 count 3236 vs 已下架 2783 |

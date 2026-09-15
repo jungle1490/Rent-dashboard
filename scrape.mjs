@@ -199,11 +199,11 @@ for (const [id, raw] of collected) {
 }
 
 // 已消失的物件：保留 7 天並標記，避免你剛看到就不見了
-const KEEP_MS = 7 * 24 * 60 * 60 * 1000;
+const KEEP_MS = 3 * 24 * 60 * 60 * 1000;   // 已下架保留 3 天（原 7 天；檔案曾長到 8.7MB、近半是已下架）
 for (const [id, prev] of prevById) {
   if (collected.has(id)) continue;
   if (Date.now() - new Date(prev.lastSeen || now).getTime() > KEEP_MS) continue;
-  listings.push({ ...prev, gone: true });
+  listings.push({ ...prev, gone: true, photos: [] });   // 已下架不留相簿，省空間；封面圖仍在
 }
 
 listings.sort((a, b) => new Date(b.firstSeen) - new Date(a.firstSeen));

@@ -10,11 +10,15 @@ if [ -s site/fb.json ]; then b2=$(git hash-object -w site/fb.json); entries="$en
 tree=$(printf '%s\n' "$entries" | git mktree)
 commit=$(echo "data $(date -u +%FT%TZ)" | git -c user.name=rent-bot -c user.email=rent-bot@local commit-tree "$tree")
 # 大檔案走 HTTPS 推送會撞到 git 預設緩衝區（HTTP 400 / RPC failed），把緩衝區調大
-git -c http.postBuffer=524288000 push --force --quiet origin "$commit:refs/heads/data"
+ok=0; for i in 1 2 3; do
+  git -c http.postBuffer=524288000 push --force --quiet origin "$commit:refs/heads/data" && { ok=1; break; }
+  echo "推送失敗（第 $i 次），5 秒後重試"; sleep 5
+done
+[ "$ok" = 1 ] || { echo "推送三次都失敗，放棄"; exit 1; }
 echo "已推送 data 分支：$commit（data.json $(du -h site/data.json | cut -f1)$( [ -s site/fb.json ] && echo ", fb.json $(du -h site/fb.json | cut -f1)" ))"
 # 孤兒分支裡沒有 workflow 檔，GitHub 不會因為推 data 而跑發布 → 這裡直接觸發 main 上的發布 workflow
 if command -v gh >/dev/null && gh auth status >/dev/null 2>&1; then
-  gh workflow run scrape.yml --ref main >/dev/null && echo "已觸發發布 workflow（約 1 分鐘後上線）"
+  for i in 1 2 3; do gh workflow run scrape.yml --ref main >/dev/null 2>&1 && { echo "已觸發發布 workflow（約 1 分鐘後上線）"; break; } || { echo "觸發失敗（第 $i 次）"; sleep 10; }; done
 else
   echo "警告：gh 未登入，無法觸發發布；請到 GitHub Actions 手動 Run workflow，或 gh auth login"
 fi
